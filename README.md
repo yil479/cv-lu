@@ -19,8 +19,10 @@ A production-grade personal portfolio that goes beyond a static CV: a dual-mode 
 - **Closed Loop** — Trace → online scoring → low quality → auto-generate test → CI gate blocks deploy
 - **Voice Mode** — OpenAI Realtime API, audio-to-audio, shared RAG pipeline
 - **GEO-ready** — `llms.txt`, structured data (JSON-LD), AI-crawler-friendly `robots.txt`
+- **Interactive Art** — a legacy drag-to-look-around 3D gallery of personal artwork, embedded via iframe alongside the Projects section
+- **Pre-commit Secret Scan** — blocks commits containing `.env` files or API-key-shaped content (see [Pre-commit Secret Scan](#pre-commit-secret-scan))
 
-**This is a template you own now.** The experience, education, and bio content is currently placeholder text (`[Your Name]`, `[Your Company]`, etc.) — see [docs/portfolio-migration-plan.md](docs/portfolio-migration-plan.md) for what was removed from the original site and what to fill in next.
+**This is a template you own now.** The experience, education, bio, and projects are Louis Lu's real background — see [docs/portfolio-migration-plan.md](docs/portfolio-migration-plan.md) for the history of how this was migrated from a different owner's site and re-personalized, including a post-migration log of what's been added since (legacy projects, the interactive art gallery, the timeline redesign, the real avatar photo, the pre-commit secret scan).
 
 ---
 
@@ -91,7 +93,7 @@ Private, password-protected dashboard showing real production data:
 
 ## Evals & Testing
 
-The eval suite currently ships with a small set of placeholder-safe tests — they check durable guardrails (no outdated model claims, always responds in English, doesn't leak internal instructions) rather than specific facts, since the CV content is still `[bracketed placeholders]`. Once you fill in your real experience, add fact-checking tests back in (see the `_todo` notes in `evals/datasets/factual.json` and `scripts/validate-llms-txt.ts`).
+The eval suite checks both durable guardrails (no outdated model claims, always responds in English, doesn't leak internal instructions) and fact-checking tests against the real CV content in `src/i18n.ts` / `chatbot-prompt.txt` (see `evals/datasets/factual.json`). If you change your experience, education, or bio, update the eval datasets in the same pass so the suite stays meaningful.
 
 | Category | Type |
 |----------|------|
@@ -177,6 +179,10 @@ LANGFUSE_SECRET_KEY=         # Langfuse tracing
 RESEND_API_KEY=              # Jailbreak email alerts
 OPS_DASHBOARD_SECRET=        # Dashboard password (/ops)
 ```
+
+### Pre-commit Secret Scan
+
+`npm install` runs `scripts/install-git-hooks.sh` (via `prepare`), which points git at the tracked hooks in `scripts/git-hooks/` instead of the untracked, per-clone `.git/hooks/`. The `pre-commit` hook runs `scripts/check-secrets.sh`, which blocks the commit if it finds a staged `.env*` file or content shaped like an API key (Anthropic, OpenAI, GitHub, AWS, JWTs, or a `SECRET`/`API_KEY`/`ACCESS_KEY`/`PRIVATE_KEY` assignment). It's a lightweight, dependency-free tripwire — not a substitute for a real scanner like `gitleaks` if you want deeper coverage. False positive? `git commit --no-verify`.
 
 ---
 

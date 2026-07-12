@@ -575,9 +575,15 @@ export default function FloatingChat() {
               transition={{ duration: 0.2 }}
               className="relative w-full h-full"
             >
-              {/* Avatar — replace with your own photo in /public */}
-              <div className="w-full h-full rounded-full bg-primary/10 flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-primary" aria-hidden="true" />
+              <div className="w-full h-full rounded-full overflow-hidden bg-primary/10">
+                <img
+                  src="/foto-avatar-sm.webp"
+                  alt=""
+                  width={56}
+                  height={56}
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                />
               </div>
               {/* Pulse ring animation */}
               <motion.div
@@ -627,8 +633,15 @@ export default function FloatingChat() {
               }
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 ring-2 ring-primary/20 flex items-center justify-center shrink-0">
-                  <MessageSquare className="w-5 h-5 text-primary" aria-hidden="true" />
+                <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-primary/20 shrink-0">
+                  <img
+                    src="/foto-avatar-sm.webp"
+                    alt=""
+                    width={40}
+                    height={40}
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div>
                   <h3 className="font-display font-semibold text-foreground">

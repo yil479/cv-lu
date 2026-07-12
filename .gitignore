@@ -56,3 +56,7 @@ chatbot/.playwright-mcp/
 .rag-hashes.json
 scripts/chunks/
 .env*
+
+# Legacy portfolio reference (dropped in for asset extraction, not part of the site)
+/luislu/
+/head_icon.png

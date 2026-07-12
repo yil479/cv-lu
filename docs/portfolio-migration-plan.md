@@ -1,5 +1,11 @@
 # Turn cv-santiago into your personal portfolio
 
+> **Status: Complete.** All 6 phases below were implemented and verified —
+> kept here as a historical record of the migration. Real content (experience,
+> education, bio, projects) has since replaced the `[bracketed placeholders]`
+> this plan created in Phase 4. See **"Post-migration updates"** at the end of
+> this document for what's changed since the migration itself landed.
+
 ## Context
 
 This repo is a React 19 + TypeScript + Vite SPA that also runs an AI chatbot,
@@ -290,3 +296,42 @@ last full sweep after all 6 phases are done:
   `src/articles/registry.ts`, `src/GlobalNav.tsx`, `scripts/prerender.tsx`,
   `vercel.json`, `index.html`, `chatbot-prompt.txt`, `api/voice-token.js`,
   `api/cron/evaluate.js`, `api/_shared/rag.js`, `evals/datasets/*.json`
+
+## Post-migration updates
+
+Work done after the migration above landed, once real content replaced the
+Phase 4 placeholders. Kept as a running log rather than rewritten into the
+phases above, since those describe the migration itself, not what came after.
+
+- **Real content.** `src/i18n.ts` experience/education/bio and
+  `chatbot-prompt.txt` were filled in with Louis Lu's actual career history
+  (JPMorgan, Fulgent Genetics, Columbia, UC San Diego) — no more
+  `[bracketed placeholders]`. `evals/datasets/factual.json` now asserts real
+  facts instead of placeholder-safe generic checks.
+- **Legacy projects restored.** Five projects from an earlier personal
+  portfolio (`/luislu`, a Start Bootstrap "Vitality" template site) were added
+  to the Projects section in `src/i18n.ts`: Musaic (music-sharing app), San
+  Diego air pollution analysis, San Diego traffic collision analysis,
+  TeamUp2018, and KitchIn. Project cards gained an optional `link` field
+  (`src/App.tsx`) to support this.
+- **Interactive Art section.** The legacy portfolio's `myart/` — a
+  vanilla-JS, drag-to-look-around 3D room gallery (`ge1doot.js` +
+  `imageTransform3D.js`, no framework) — was copied into `public/myart/` and
+  embedded via a same-origin `<iframe>` in a new "Art" section on the home
+  page (`src/App.tsx`, between Projects and Education). Chosen over a native
+  React rebuild to preserve the original behavior exactly; `vercel.json`'s
+  CSP already allowed same-origin iframes and inline scripts, so no config
+  changes were needed.
+- **Experience section restyled.** Rebuilt as an alternating zig-zag timeline
+  (center connecting line, circular icon badges, alternating panels on
+  desktop, single left-rail column on mobile) to match the old portfolio's
+  look, using Tailwind only — no data changes.
+- **Real avatar photo.** The hero avatar and chat-widget avatar — called out
+  in Phase 4 above as "generic icon placeholders" pending a real photo — now
+  use `public/foto-avatar.webp` (480×480) and `public/foto-avatar-sm.webp`
+  (160×160), wired into the LCP preload tags in `index.html` that
+  `scripts/prerender.tsx` was already built to consume.
+- **Pre-commit secret scan.** `scripts/check-secrets.sh`, tracked git hooks in
+  `scripts/git-hooks/`, and a `prepare` script in `package.json` now block
+  commits containing `.env` files or API-key-shaped content. See the
+  "Pre-commit Secret Scan" section in `README.md`.

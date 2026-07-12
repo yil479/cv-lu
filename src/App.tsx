@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useReducer, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
-import { Mail, ExternalLink, Briefcase, GraduationCap, Award, Code, Globe, Bot, Zap, BadgeCheck, FolderGit2, SkipForward, List, Users } from 'lucide-react'
+import { Mail, ExternalLink, Briefcase, GraduationCap, Award, Code, Globe, Bot, Zap, BadgeCheck, FolderGit2, SkipForward, List, Palette, Maximize2 } from 'lucide-react'
 import { translations, seo } from './i18n'
 import { useHomeSeo } from './articles/use-article-seo'
 import { getTechIcon } from './tech-icons'
@@ -275,6 +275,7 @@ function useTypewriterRotation(roles: readonly string[], { typeSpeed = 80, delet
 const HOME_TOC_SECTIONS = [
   { id: 'experience', label: 'Experience' },
   { id: 'projects', label: 'Projects' },
+  { id: 'art', label: 'Art' },
   { id: 'education', label: 'Education' },
   { id: 'tech', label: 'Skills & Stack' },
   { id: 'contact', label: 'Contact' },
@@ -406,7 +407,7 @@ function HomeToc() {
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.3 }}
             onClick={() => setTocOpen(o => !o)}
-            className="2xl:hidden fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center"
+            className="2xl:hidden fixed bottom-24 right-6 z-40 w-11 h-11 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center"
             aria-label="Toggle table of contents"
           >
             <List className="w-5 h-5" />
@@ -414,7 +415,7 @@ function HomeToc() {
           {tocOpen && (
             <>
               <div className="2xl:hidden fixed inset-0 bg-background/60 backdrop-blur-sm z-40" onClick={() => setTocOpen(false)} />
-              <div className="2xl:hidden fixed bottom-20 right-6 z-50 w-64 max-h-[70vh] overflow-y-auto bg-card border border-border rounded-xl shadow-xl p-4">
+              <div className="2xl:hidden fixed bottom-40 right-6 z-50 w-64 max-h-[70vh] overflow-y-auto bg-card border border-border rounded-xl shadow-xl p-4">
                 {tocNav}
               </div>
             </>
@@ -1473,9 +1474,18 @@ function App() {
                 <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-white/5 md:backdrop-blur-sm border border-white/20 shadow-2xl" />
                 {/* Inner border */}
                 <div className="absolute inset-2 rounded-full bg-gradient-theme-50 p-[2px]">
-                  {/* Placeholder avatar — replace with /public/foto-avatar.webp + /public/foto-avatar-sm.webp of your own photo */}
-                  <div className="w-full h-full rounded-full overflow-hidden bg-muted flex items-center justify-center">
-                    <Users className="w-16 h-16 md:w-20 md:h-20 text-muted-foreground/40" aria-hidden="true" />
+                  <div className="w-full h-full rounded-full overflow-hidden bg-muted">
+                    <img
+                      src="/foto-avatar.webp"
+                      srcSet="/foto-avatar-sm.webp 160w, /foto-avatar.webp 480w"
+                      sizes="(min-width: 768px) 192px, 160px"
+                      alt="Louis Lu"
+                      width={480}
+                      height={480}
+                      fetchPriority="high"
+                      decoding="async"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
               </div>
@@ -1564,32 +1574,46 @@ function App() {
               </div>
             </div>
           </AnimatedSection>
-          {t.experience.items.map((item, i) => (
-            <AnimatedSection key={item.company} delay={0.1 + i * 0.05}>
-              <div className="mb-12">
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <Briefcase className="w-5 h-5 text-primary" />
+          <div className="relative">
+            {/* connecting line: left rail on mobile, centered on desktop */}
+            <div className="absolute left-5 md:left-1/2 top-2 bottom-2 w-0.5 bg-border md:-translate-x-1/2" aria-hidden="true" />
+
+            {t.experience.items.map((item, i) => {
+              const isEven = i % 2 === 0
+              return (
+                <AnimatedSection key={item.company} delay={0.1 + i * 0.05}>
+                  <div className={`relative mb-12 pl-14 md:pl-0 md:flex md:items-start md:gap-8 ${isEven ? '' : 'md:flex-row-reverse'}`}>
+                    {/* badge dot */}
+                    <div
+                      className={`absolute left-0 md:left-1/2 md:-translate-x-1/2 top-0 w-10 h-10 rounded-full ${isEven ? 'bg-primary' : 'bg-accent'} flex items-center justify-center ring-4 ring-background z-10 shrink-0`}
+                    >
+                      <Briefcase className="w-5 h-5 text-white" />
                     </div>
-                    <h3 className="font-display text-2xl font-bold">{item.company}</h3>
+                    <div className="hidden md:block md:w-1/2" aria-hidden="true" />
+                    <div className="md:w-1/2">
+                      <div className="p-6 rounded-2xl bg-card border border-border">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-2">
+                          <h3 className="font-display text-2xl font-bold">{item.company}</h3>
+                          <span className="text-sm text-muted-foreground">{item.location}</span>
+                        </div>
+                        <p className="text-primary font-medium mb-1">{item.role}</p>
+                        <p className="text-sm text-muted-foreground mb-2">{item.period}</p>
+                        <p className="text-muted-foreground whitespace-pre-line mb-4">{item.desc}</p>
+                        <ul className="text-sm text-muted-foreground space-y-1">
+                          {item.highlights.map((h, hi) => (
+                            <li key={hi} className="flex items-start gap-2">
+                              <span className="text-primary mt-1">•</span>
+                              <span>{h}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-sm text-muted-foreground">{item.location}</span>
-                </div>
-                <p className="text-primary font-medium mb-1">{item.role}</p>
-                <p className="text-sm text-muted-foreground mb-2">{item.period}</p>
-                <p className="text-muted-foreground whitespace-pre-line mb-4">{item.desc}</p>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  {item.highlights.map((h, hi) => (
-                    <li key={hi} className="flex items-start gap-2">
-                      <span className="text-primary mt-1">•</span>
-                      <span>{h}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </AnimatedSection>
-          ))}
+                </AnimatedSection>
+              )
+            })}
+          </div>
 
         </div>
       </section>
@@ -1610,20 +1634,68 @@ function App() {
             {t.projects.items.map((project, i) => (
               <AnimatedSection key={project.title} delay={0.1 + i * 0.1}>
                 <div className="h-full p-6 rounded-2xl bg-card border border-border hover:border-accent/30 transition-colors duration-200 flex flex-col">
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <h3 className="font-display text-lg font-bold leading-snug">{project.title}</h3>
+                  <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
+                    <h3 className="font-display text-lg font-bold leading-snug min-w-0">{project.title}</h3>
                     <span className="shrink-0 text-[10px] uppercase tracking-[0.2em] font-medium px-2 py-1 rounded-full border border-accent/40 bg-accent/10 text-accent whitespace-nowrap">{project.badge}</span>
                   </div>
                   <p className="text-sm text-muted-foreground mb-4 flex-1">{project.desc}</p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 mb-1">
                     {project.tech.map((tech) => (
                       <span key={tech} className="px-2 py-0.5 rounded text-xs bg-muted/30 text-muted-foreground">{tech}</span>
                     ))}
                   </div>
+                  {'link' in project && project.link && (
+                    <a
+                      href={project.link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 mt-3 text-sm font-medium text-primary hover:underline"
+                    >
+                      {project.link.label}
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  )}
                 </div>
               </AnimatedSection>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Interactive Art */}
+      <section id="art" className="py-16 md:py-24 bg-muted/30" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 900px' }}>
+        <div className="max-w-5xl mx-auto px-6">
+          <AnimatedSection>
+            <h2 className="font-display text-2xl font-semibold mb-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                <Palette className="w-5 h-5 text-accent" />
+              </div>
+              Interactive Art
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              A drag-to-look-around 3D gallery of my artwork. Click and drag to rotate the room, tap a piece to zoom in.
+            </p>
+          </AnimatedSection>
+          <AnimatedSection delay={0.1}>
+            <div className="relative rounded-2xl overflow-hidden border border-border bg-card">
+              <iframe
+                src="/myart/index1.html"
+                title="Interactive 3D art gallery"
+                className="w-full h-[420px] md:h-[560px] block"
+                loading="lazy"
+                sandbox="allow-scripts allow-same-origin"
+              />
+              <a
+                href="/myart/index1.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute top-3 right-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/80 backdrop-blur border border-border text-xs font-medium hover:border-primary/50 transition-colors"
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+                Fullscreen
+              </a>
+            </div>
+          </AnimatedSection>
         </div>
       </section>
 
