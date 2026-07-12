@@ -5,7 +5,7 @@ import { ArticleLayout } from './articles/components'
 const content = {
     title: 'Privacy Policy',
     lastUpdated: 'Last updated: March 15, 2026',
-    intro: 'This policy describes how data is collected and used when you visit cv-santiago.vercel.app.',
+    intro: 'This policy describes how data is collected and used when you visit cv-lu.vercel.app.',
     sections: [
       {
         heading: 'What data is collected',
@@ -60,7 +60,7 @@ export default function PrivacyPolicy() {
   const t = content
 
   useEffect(() => {
-    document.title = `${t.title} | cv-santiago.vercel.app`
+    document.title = `${t.title} | cv-lu.vercel.app`
 
     // noindex
     let robots = document.querySelector('meta[name="robots"]') as HTMLMetaElement
@@ -73,11 +73,11 @@ export default function PrivacyPolicy() {
 
     // Fix canonical (SPA fallback serves homepage canonical — override it)
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement
-    if (canonical) canonical.href = 'https://cv-santiago.vercel.app/privacy'
+    if (canonical) canonical.href = 'https://cv-lu.vercel.app/privacy'
 
     // Fix meta description
     let desc = document.querySelector('meta[name="description"]') as HTMLMetaElement
-    if (desc) desc.content = 'Privacy policy for cv-santiago.vercel.app. How chatbot and website data is collected and used.'
+    if (desc) desc.content = 'Privacy policy for cv-lu.vercel.app. How chatbot and website data is collected and used.'
 
     return () => {
       robots.content = 'index, follow'

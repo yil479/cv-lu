@@ -27,7 +27,7 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
-Sitemap: https://cv-santiago.vercel.app/sitemap.xml
+Sitemap: https://cv-lu.vercel.app/sitemap.xml
 
 # IndexNow key (Bing, Yandex, Naver, Seznam)
-# Key file: https://cv-santiago.vercel.app/a538d844-6767-41b9-9028-381ee4b8d567.txt
+# Key file: https://cv-lu.vercel.app/a538d844-6767-41b9-9028-381ee4b8d567.txt

@@ -7,7 +7,7 @@
  * Usage:
  *   npx tsx scripts/check-console-errors.ts [base-url]
  *   Default base URL: http://localhost:5173
- *   Production: npx tsx scripts/check-console-errors.ts https://cv-santiago.vercel.app
+ *   Production: npx tsx scripts/check-console-errors.ts https://cv-lu.vercel.app
  *
  * Exit code 1 if any console errors found.
  */
@@ -33,10 +33,10 @@ function getUrls(): string[] {
   const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1])
 
   // Add utility pages not in sitemap
-  urls.push('https://cv-santiago.vercel.app/privacy')
+  urls.push('https://cv-lu.vercel.app/privacy')
 
   // Convert to use the base URL
-  return urls.map(url => url.replace('https://cv-santiago.vercel.app', baseUrl))
+  return urls.map(url => url.replace('https://cv-lu.vercel.app', baseUrl))
 }
 
 interface PageResult {

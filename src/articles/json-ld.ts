@@ -61,9 +61,9 @@ interface JsonLdOptions {
 
 const PERSON = {
   '@type': 'Person',
-  '@id': 'https://cv-santiago.vercel.app/#person',
+  '@id': 'https://cv-lu.vercel.app/#person',
   name: 'Louis Lu',
-  url: 'https://cv-santiago.vercel.app',
+  url: 'https://cv-lu.vercel.app',
   jobTitle: 'Senior Software Engineer',
   sameAs: [
     'https://www.linkedin.com/in/louis-lu-5b220713b/',
@@ -73,9 +73,9 @@ const PERSON = {
 
 const WEBSITE = {
   '@type': 'WebSite',
-  '@id': 'https://cv-santiago.vercel.app/#website',
-  name: 'cv-santiago.vercel.app',
-  url: 'https://cv-santiago.vercel.app',
+  '@id': 'https://cv-lu.vercel.app/#website',
+  name: 'cv-lu.vercel.app',
+  url: 'https://cv-lu.vercel.app',
 }
 
 export function buildArticleJsonLd(opts: JsonLdOptions) {
@@ -88,12 +88,12 @@ export function buildArticleJsonLd(opts: JsonLdOptions) {
       headline: opts.headline,
       alternativeHeadline: opts.alternativeHeadline,
       description: opts.description,
-      author: { '@id': 'https://cv-santiago.vercel.app/#person' },
+      author: { '@id': 'https://cv-lu.vercel.app/#person' },
       // Publisher: Person-as-publisher is valid for CreativeWork on personal sites
       // (you publish on your own domain). Override only for collabs with other authors.
       publisher: opts.publisher
         ? { '@type': 'Organization', name: opts.publisher.name, url: opts.publisher.url }
-        : { '@id': 'https://cv-santiago.vercel.app/#person' },
+        : { '@id': 'https://cv-lu.vercel.app/#person' },
       datePublished: opts.datePublished,
       dateModified: opts.dateModified,
       keywords: opts.keywords,
@@ -101,7 +101,7 @@ export function buildArticleJsonLd(opts: JsonLdOptions) {
       mainEntityOfPage: opts.url,
       image: opts.images,
       inLanguage,
-      isPartOf: { '@id': 'https://cv-santiago.vercel.app/#website' },
+      isPartOf: { '@id': 'https://cv-lu.vercel.app/#website' },
       ...(opts.about ? { about: opts.about } : {}),
       ...(opts.extra || {}),
       ...(opts.citation ? { citation: opts.citation } : {}),
@@ -118,7 +118,7 @@ export function buildArticleJsonLd(opts: JsonLdOptions) {
       '@type': 'BreadcrumbList',
       '@id': `${opts.url}/#breadcrumbs`,
       itemListElement: [
-        { '@type': 'ListItem', '@id': `${opts.url}/#breadcrumb-1`, position: 1, name: opts.breadcrumbHome, item: 'https://cv-santiago.vercel.app' },
+        { '@type': 'ListItem', '@id': `${opts.url}/#breadcrumb-1`, position: 1, name: opts.breadcrumbHome, item: 'https://cv-lu.vercel.app' },
         { '@type': 'ListItem', '@id': `${opts.url}/#breadcrumb-2`, position: 2, name: opts.breadcrumbCurrent, item: opts.url },
       ],
     },
@@ -157,7 +157,7 @@ export function buildJsonLdFromRegistry(
 
   const meta = config.seoMeta
   return buildArticleJsonLd({
-    url: `https://cv-santiago.vercel.app/${i18n.slug}`,
+    url: `https://cv-lu.vercel.app/${i18n.slug}`,
     headline: i18n.header.h1,
     alternativeHeadline: i18n.seo.title,
     description: i18n.seo.description,

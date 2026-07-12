@@ -41,7 +41,7 @@ npm run evals
 
 **Option 2: Against production** (to validate a deploy)
 ```bash
-CHAT_API_URL=https://cv-santiago.vercel.app/api/chat npm run evals
+CHAT_API_URL=https://cv-lu.vercel.app/api/chat npm run evals
 ```
 
 > **Note:** `npm run dev` (Vite) does not serve the `/api/chat` edge functions. Use `vercel dev` for local development.

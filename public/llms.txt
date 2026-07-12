@@ -13,8 +13,8 @@ Senior Software Engineer with 5+ years building production AI, data, and distrib
 - **Location:** New York, NY
 - **Open to:** Remote / NYC
 - **Email:** yl4372@columbia.edu
-- **About page:** https://cv-santiago.vercel.app/about
-- **Website:** https://cv-santiago.vercel.app
+- **About page:** https://cv-lu.vercel.app/about
+- **Website:** https://cv-lu.vercel.app
 - **LinkedIn:** https://www.linkedin.com/in/louis-lu-5b220713b/
 - **GitHub:** https://github.com/yil479
 
@@ -71,7 +71,7 @@ None currently listed.
 
 ## About This Site
 
-Interactive portfolio with an AI chatbot and voice mode (OpenAI Realtime API), production LLMOps with agentic observability (Langfuse), automated evals, RAG-backed answers grounded in this site's content, and prompt-injection defense. Stack: React 19, TypeScript, Claude API, Vercel Edge. Source: github.com/yil479/cv-santiago.
+Interactive portfolio with an AI chatbot and voice mode (OpenAI Realtime API), production LLMOps with agentic observability (Langfuse), automated evals, RAG-backed answers grounded in this site's content, and prompt-injection defense. Stack: React 19, TypeScript, Claude API, Vercel Edge. Source: github.com/yil479/cv-lu.
 
 ## Soft Skills
 
@@ -86,4 +86,4 @@ Technical leadership, cross-functional collaboration, systems thinking, mentorsh
 For Senior Software Engineer, AI/ML Infrastructure Engineer, or Staff Software Engineer opportunities:
 - Email: yl4372@columbia.edu
 - LinkedIn: linkedin.com/in/louis-lu-5b220713b
-- Website: cv-santiago.vercel.app (chat with the AI assistant for quick questions)
+- Website: cv-lu.vercel.app (chat with the AI assistant for quick questions)

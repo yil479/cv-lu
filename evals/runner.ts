@@ -389,7 +389,7 @@ async function main() {
     )
     console.log(`${colors.dim}   Options:${colors.reset}`)
     console.log(`${colors.dim}   1. Run 'vercel dev' (serves edge functions on port 3000)${colors.reset}`)
-    console.log(`${colors.dim}   2. Test against production: CHAT_API_URL=https://cv-santiago.vercel.app/api/chat npm run evals${colors.reset}`)
+    console.log(`${colors.dim}   2. Test against production: CHAT_API_URL=https://cv-lu.vercel.app/api/chat npm run evals${colors.reset}`)
     process.exit(1)
   }
 

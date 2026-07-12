@@ -22,7 +22,7 @@ export default function AboutPage() {
 
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement
     if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical) }
-    canonical.href = `https://cv-santiago.vercel.app/${t.slug}`
+    canonical.href = `https://cv-lu.vercel.app/${t.slug}`
 
     // ProfilePage + FAQPage JSON-LD now SSR'd by prerender (scripts/prerender.tsx → buildAboutJsonLd).
     // No useEffect injection needed for SEO. SPA-navigated visits keep the prerendered HTML's

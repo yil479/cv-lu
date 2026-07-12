@@ -62,7 +62,7 @@ function urlBlock(u: SitemapUrl): string {
 // Build URLs
 // ---------------------------------------------------------------------------
 
-const base = 'https://cv-santiago.vercel.app'
+const base = 'https://cv-lu.vercel.app'
 const urls: SitemapUrl[] = []
 
 urls.push({

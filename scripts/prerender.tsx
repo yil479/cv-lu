@@ -117,9 +117,9 @@ const aboutPersonProfile = {
   dateModified: '2026-07-09',
   mainEntity: {
     '@type': 'Person',
-    '@id': 'https://cv-santiago.vercel.app/#person',
+    '@id': 'https://cv-lu.vercel.app/#person',
     name: 'Louis Lu',
-    url: 'https://cv-santiago.vercel.app',
+    url: 'https://cv-lu.vercel.app',
     email: 'yl4372@columbia.edu',
     jobTitle: ['Senior Software Engineer'],
     knowsAbout: ['[Skill 1]', '[Skill 2]', '[Skill 3]'],
@@ -147,7 +147,7 @@ function buildAboutJsonLd(pageUrl: string, faq: readonly { q: string; a: string 
     '@id': `${pageUrl}#profilepage`,
     dateModified: aboutPersonProfile.dateModified,
     inLanguage: 'en',
-    mainEntity: { '@id': 'https://cv-santiago.vercel.app/#person' },
+    mainEntity: { '@id': 'https://cv-lu.vercel.app/#person' },
   };
   return {
     '@context': 'https://schema.org',
@@ -165,7 +165,7 @@ const aboutPages: AboutPageData[] = [];
 {
   const t = aboutContent;
   const slug = t.slug;
-  const url = `https://cv-santiago.vercel.app/${slug}`;
+  const url = `https://cv-lu.vercel.app/${slug}`;
 
   let renderedHtml: string;
   try {
@@ -226,7 +226,7 @@ function buildArticlePage(
   ArticleComponent: ComponentType,
 ): string {
   const slug = config.slug;
-  const url = `https://cv-santiago.vercel.app/${slug}`;
+  const url = `https://cv-lu.vercel.app/${slug}`;
   const articleSeo = config.seo;
 
   let renderedHtml: string;
@@ -251,7 +251,7 @@ function buildArticlePage(
     .replace(/<meta name="twitter:title" content="[^"]*" \/>/, `<meta name="twitter:title" content="${esc(articleSeo.title)}" />`)
     .replace(/<meta name="twitter:description" content="[^"]*" \/>/, `<meta name="twitter:description" content="${esc(articleSeo.description)}" />`)
     // OG image — replace with article-specific image if configured
-    .replace(/<meta property="og:image" content="[^"]*" \/>/, `<meta property="og:image" content="${esc(config.ogImage || 'https://cv-santiago.vercel.app/og-image.webp')}" />`)
+    .replace(/<meta property="og:image" content="[^"]*" \/>/, `<meta property="og:image" content="${esc(config.ogImage || 'https://cv-lu.vercel.app/og-image.webp')}" />`)
     .replace(/<meta property="og:image:alt" content="[^"]*" \/>/, `<meta property="og:image:alt" content="${esc(articleSeo.title)}" />`)
     .replace(/<meta name="twitter:image" content="[^"]*" \/>/, config.ogImage ? `<meta name="twitter:image" content="${esc(config.ogImage)}" />` : '');
 
@@ -392,9 +392,9 @@ const privacyPages: { slug: string; html: string }[] = [];
 
 {
   const slug = 'privacy';
-  const url = `https://cv-santiago.vercel.app/${slug}`;
-  const title = 'Privacy Policy | cv-santiago.vercel.app';
-  const description = 'Privacy policy for cv-santiago.vercel.app. How chatbot and website data is collected and used.';
+  const url = `https://cv-lu.vercel.app/${slug}`;
+  const title = 'Privacy Policy | cv-lu.vercel.app';
+  const description = 'Privacy policy for cv-lu.vercel.app. How chatbot and website data is collected and used.';
 
   let renderedHtml: string;
   try {
@@ -463,7 +463,7 @@ await inlineCriticalCSS();
 const notFoundHtml = indexHtml
   .replace('<div id="root"></div>', `<div id="root"><div style="min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 1.5rem"><p style="font-size:6rem;font-weight:bold;color:var(--primary);margin-bottom:1rem;font-family:var(--font-display)">404</p><h1 style="font-size:1.5rem;font-weight:600;color:var(--foreground);margin-bottom:0.5rem">Page not found</h1><p style="color:var(--muted-foreground);margin-bottom:2rem;max-width:28rem">The page you're looking for doesn't exist or has been moved.</p><a href="/" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.5rem;border-radius:0.75rem;background:var(--primary);color:var(--primary-foreground);font-weight:500;text-decoration:none">← Back to home</a></div></div>`)
   .replace(/<meta name="robots" content="[^"]*" \/>/, '<meta name="robots" content="noindex, nofollow" />')
-  .replace(/<title>[^<]*<\/title>/, '<title>404 — Page not found | cv-santiago.vercel.app</title>');
+  .replace(/<title>[^<]*<\/title>/, '<title>404 — Page not found | cv-lu.vercel.app</title>');
 
 // Add noindex if no robots meta exists
 if (!notFoundHtml.includes('name="robots"')) {

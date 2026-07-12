@@ -1,9 +1,9 @@
-# Security Policy for cv-santiago.vercel.app
+# Security Policy for cv-lu.vercel.app
 # https://securitytxt.org/ — RFC 9116
 
 Contact: mailto:yl4372@columbia.edu
 Preferred-Languages: en
-Canonical: https://cv-santiago.vercel.app/.well-known/security.txt
+Canonical: https://cv-lu.vercel.app/.well-known/security.txt
 Expires: 2027-02-19T00:00:00.000Z
 
 # Security measures implemented:

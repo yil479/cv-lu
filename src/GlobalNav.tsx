@@ -7,7 +7,7 @@ import { getPageTitles, getSectionLabels } from './articles/registry'
  * GlobalNav — unified navigation across all pages.
  *
  * The translucent bar is a "contextual message container" that appears
- * on inner pages to show a permanent "← cv-santiago.vercel.app" back link. Controls
+ * on inner pages to show a permanent "← cv-lu.vercel.app" back link. Controls
  * always live inside the bar when it's visible; when there's no bar
  * (home page), controls float fixed at top-6 right-6.
  */
@@ -187,7 +187,7 @@ export default function GlobalNav() {
                   className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors shrink-0"
                 >
                   <House className="w-4 h-4" />
-                  <span className="hidden sm:inline">cv-santiago.vercel.app</span>
+                  <span className="hidden sm:inline">cv-lu.vercel.app</span>
                 </Link>
                 {pageTitle && (
                   <>

@@ -2,7 +2,7 @@
 Builder: Louis Lu
 Role: Senior Software Engineer
 Contact: yl4372@columbia.edu
-Site: https://cv-santiago.vercel.app
+Site: https://cv-lu.vercel.app
 Location: New York, NY
 LinkedIn: https://linkedin.com/in/louis-lu-5b220713b
 GitHub: https://github.com/yil479

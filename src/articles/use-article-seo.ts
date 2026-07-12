@@ -45,7 +45,7 @@ export function useArticleSeo(opts: ArticleSeoOpts) {
   useEffect(() => {
     const { slug, title, description, image, publishedTime, modifiedTime, articleTags, jsonLd } = opts
 
-    const url = `https://cv-santiago.vercel.app/${slug}`
+    const url = `https://cv-lu.vercel.app/${slug}`
 
     document.title = title
 
@@ -59,7 +59,7 @@ export function useArticleSeo(opts: ArticleSeoOpts) {
     upsertMeta('property', 'og:url', url)
     upsertMeta('property', 'og:title', title)
     upsertMeta('property', 'og:description', description)
-    upsertMeta('property', 'og:site_name', 'cv-santiago.vercel.app')
+    upsertMeta('property', 'og:site_name', 'cv-lu.vercel.app')
     upsertMeta('property', 'og:locale', 'en_US')
     upsertMeta('property', 'article:published_time', publishedTime)
     if (modifiedTime) upsertMeta('property', 'article:modified_time', modifiedTime)
@@ -106,7 +106,7 @@ export function useHomeSeo({ title, description }: { title: string; description:
     document.querySelector('meta[property="og:description"]')?.setAttribute('content', description)
     document.querySelector('meta[property="og:locale"]')?.setAttribute('content', 'en_US')
 
-    const canonical = 'https://cv-santiago.vercel.app/'
+    const canonical = 'https://cv-lu.vercel.app/'
     document.querySelector('link[rel="canonical"]')?.setAttribute('href', canonical)
     document.querySelector('meta[property="og:url"]')?.setAttribute('content', canonical)
 

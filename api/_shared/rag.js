@@ -424,7 +424,7 @@ export async function sendJailbreakAlert(userMessage) {
     body: JSON.stringify({
       from: 'Portfolio Bot <onboarding@resend.dev>',
       to: process.env.ALERT_EMAIL,
-      subject: '🚨 JAILBREAK ATTEMPT - cv-santiago.vercel.app',
+      subject: '🚨 JAILBREAK ATTEMPT - cv-lu.vercel.app',
       html: `
         <h2>🚨 Jailbreak Attempt Detected</h2>
         <p><strong>Time:</strong> ${new Date().toISOString()}</p>

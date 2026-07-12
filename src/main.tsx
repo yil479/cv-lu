@@ -129,7 +129,7 @@ function NotFound() {
     let robots = document.querySelector('meta[name="robots"]') as HTMLMetaElement
     if (!robots) { robots = document.createElement('meta'); robots.name = 'robots'; document.head.appendChild(robots) }
     robots.content = 'noindex, nofollow'
-    document.title = '404 — Page not found | cv-santiago.vercel.app'
+    document.title = '404 — Page not found | cv-lu.vercel.app'
     return () => { robots.content = 'index, follow' }
   }, [])
 
