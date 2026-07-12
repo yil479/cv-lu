@@ -2,7 +2,7 @@
 
 > Interactive personal portfolio with an AI chatbot (text + voice), agentic RAG, automated evals, an LLMOps dashboard, and prompt-injection defense.
 
-[![Live Demo](https://img.shields.io/badge/demo-cv--santiago.vercel.app-blue?style=flat-square)](https://cv-lu.vercel.app)
+[![Live Demo](https://img.shields.io/badge/demo-cv--lu.vercel.app-blue?style=flat-square)](https://cv-lu.vercel.app)
 [![Built with Claude Code](https://img.shields.io/badge/built%20with-Claude%20Code-blueviolet?style=flat-square)](https://claude.ai/code)
 
 ---
