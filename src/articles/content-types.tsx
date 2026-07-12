@@ -1019,48 +1019,43 @@ export function StoryBridge({ lines, className, editorId }: StoryBridgeProps) {
 }
 
 // ---------------------------------------------------------------------------
-// 17. ScreenshotGrid + ScreenshotCaption (moved from JacoboAgent)
+// 17. ScreenshotGrid + ScreenshotCaption
 // ---------------------------------------------------------------------------
 
-function ScreenshotFigure({ src, alt, summaryEn, lang, width, height, className }: { src: string; alt: string; summaryEn: string; lang: 'es' | 'en'; width?: number; height?: number; className?: string }) {
-  const showOverlay = lang === 'en'
+function ScreenshotFigure({ src, alt, summaryEn, width, height, className }: { src: string; alt: string; summaryEn: string; width?: number; height?: number; className?: string }) {
   const [hovered, setHovered] = useState(false)
   return (
     <figure
-      className={`bg-card border border-border rounded-lg overflow-hidden relative ${showOverlay ? 'cursor-pointer' : ''} ${className ?? ''}`}
-      onMouseEnter={showOverlay ? () => setHovered(true) : undefined}
-      onMouseLeave={showOverlay ? () => setHovered(false) : undefined}
-      onClick={showOverlay ? () => setHovered(h => !h) : undefined}
+      className={`bg-card border border-border rounded-lg overflow-hidden relative cursor-pointer ${className ?? ''}`}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={() => setHovered(h => !h)}
     >
       <img src={src} alt={alt} width={width} height={height} className="w-full h-auto min-h-[120px] object-contain bg-card dark:brightness-[0.85]" loading="lazy" decoding="async" />
-      {showOverlay && (
-        <div
-          className="absolute inset-0 flex items-center justify-center p-3 transition-opacity duration-200"
-          style={{ backgroundColor: 'hsl(var(--background) / 0.92)', opacity: hovered ? 1 : 0, pointerEvents: hovered ? 'auto' : 'none' }}
-        >
-          <p className="text-xs text-foreground leading-relaxed text-center">{summaryEn}</p>
-        </div>
-      )}
+      <div
+        className="absolute inset-0 flex items-center justify-center p-3 transition-opacity duration-200"
+        style={{ backgroundColor: 'hsl(var(--background) / 0.92)', opacity: hovered ? 1 : 0, pointerEvents: hovered ? 'auto' : 'none' }}
+      >
+        <p className="text-xs text-foreground leading-relaxed text-center">{summaryEn}</p>
+      </div>
     </figure>
   )
 }
 
 export interface ScreenshotItem {
   src: string
-  altEs: string
-  altEn: string
+  alt: string
   width?: number
   height?: number
 }
 
 interface ScreenshotGridProps {
   items: readonly ScreenshotItem[]
-  lang: 'es' | 'en'
   basePath?: string
   editorId?: string
 }
 
-export function ScreenshotGrid({ items, lang, basePath = '/jacobo/screenshots', editorId }: ScreenshotGridProps) {
+export function ScreenshotGrid({ items, basePath = '/jacobo/screenshots', editorId }: ScreenshotGridProps) {
   if (items.length < 3) {
     return (
       <EditorLabel name="ScreenshotGrid" id={editorId}>
@@ -1069,9 +1064,8 @@ export function ScreenshotGrid({ items, lang, basePath = '/jacobo/screenshots', 
             <ScreenshotFigure
               key={n.src}
               src={`${basePath}/${n.src}`}
-              alt={lang === 'es' ? n.altEs : n.altEn}
-              summaryEn={n.altEn}
-              lang={lang}
+              alt={n.alt}
+              summaryEn={n.alt}
               width={n.width}
               height={n.height}
               className="w-1/2 sm:w-1/3"
@@ -1088,9 +1082,8 @@ export function ScreenshotGrid({ items, lang, basePath = '/jacobo/screenshots', 
           <ScreenshotFigure
             key={n.src}
             src={`${basePath}/${n.src}`}
-            alt={lang === 'es' ? n.altEs : n.altEn}
-            summaryEn={n.altEn}
-            lang={lang}
+            alt={n.alt}
+            summaryEn={n.alt}
             width={n.width}
             height={n.height}
           />
@@ -1101,16 +1094,14 @@ export function ScreenshotGrid({ items, lang, basePath = '/jacobo/screenshots', 
 }
 
 interface ScreenshotCaptionProps {
-  es: string
-  en: string
-  lang: 'es' | 'en'
+  text: string
   editorId?: string
 }
 
-export function ScreenshotCaption({ es, en, lang, editorId }: ScreenshotCaptionProps) {
+export function ScreenshotCaption({ text, editorId }: ScreenshotCaptionProps) {
   return (
     <EditorLabel name="ScreenshotCaption" id={editorId}>
-      <p className="text-xs text-muted-foreground mb-6 -mt-4 px-1">{lang === 'es' ? es : en}</p>
+      <p className="text-xs text-muted-foreground mb-6 -mt-4 px-1">{text}</p>
     </EditorLabel>
   )
 }
@@ -1363,7 +1354,7 @@ interface AudioItem {
   highlight?: string
 }
 
-export function AudioPlayer({ editorId, items, lang }: { editorId?: string; items: AudioItem[]; lang?: string }) {
+export function AudioPlayer({ editorId, items }: { editorId?: string; items: AudioItem[] }) {
   return (
     <EditorLabel name="AudioPlayer" id={editorId}>
       <div className="space-y-4 mb-6">
@@ -1377,10 +1368,10 @@ export function AudioPlayer({ editorId, items, lang }: { editorId?: string; item
             </audio>
             <p className="text-sm text-muted-foreground leading-relaxed italic">
               {item.highlight
-                ? formatHighlight(item.transcriptOriginal ?? item.transcript, lang === 'en' ? item.highlight : item.highlight)
+                ? formatHighlight(item.transcriptOriginal ?? item.transcript, item.highlight)
                 : (item.transcriptOriginal ?? item.transcript)}
             </p>
-            {lang === 'en' && item.transcriptOriginal && (
+            {item.transcriptOriginal && (
               <p className="text-xs text-muted-foreground/70 leading-relaxed mt-1.5">
                 {item.highlight
                   ? formatHighlight(item.transcript, item.highlight)

@@ -5,7 +5,7 @@ import { Analytics } from '@vercel/analytics/react'
 import './index.css'
 import App from './App.tsx'
 import GlobalNav from './GlobalNav.tsx'
-import { articleRegistry, getEsSlugs } from './articles/registry'
+import { articleRegistry } from './articles/registry'
 
 const FloatingChat = lazy(() => import('./FloatingChat'))
 const MusicToggle = lazy(() => import('./MusicToggle'))
@@ -14,7 +14,7 @@ const PrivacyPolicy = lazy(() => import('./PrivacyPolicy'))
 const AboutPage = lazy(() => import('./AboutPage'))
 
 // Lazy-load article components from registry
-const articleComponents: Record<string, React.LazyExoticComponent<ComponentType<{ lang: 'es' | 'en' }>>> = {}
+const articleComponents: Record<string, React.LazyExoticComponent<ComponentType>> = {}
 for (const article of articleRegistry) {
   articleComponents[article.id] = lazy(article.component)
 }
@@ -74,13 +74,10 @@ function GlobalChat() {
 
   if (!hydrated || pathname.startsWith('/ops')) return null
 
-  const esSlugs = getEsSlugs()
-  const lang = esSlugs.has(pathname) ? 'es' : 'en'
-
   return (
     <ChatErrorBoundary>
       <Suspense fallback={null}>
-        <FloatingChat lang={lang} />
+        <FloatingChat />
       </Suspense>
     </ChatErrorBoundary>
   )
@@ -105,37 +102,34 @@ function ConditionalNav() {
 }
 
 // Console easter egg
-const ASCII_ART = `\n ███████╗ █████╗ ███╗   ██╗████████╗██╗███████╗███████╗██████╗ \n ██╔════╝██╔══██╗████╗  ██║╚══██╔══╝██║██╔════╝██╔════╝██╔══██╗\n ███████╗███████║██╔██╗ ██║   ██║   ██║█████╗  █████╗  ██████╔╝\n ╚════██║██╔══██║██║╚██╗██║   ██║   ██║██╔══╝  ██╔══╝  ██╔══██╗\n ███████║██║  ██║██║ ╚████║   ██║   ██║██║     ███████╗██║  ██║\n ╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚═╝╚═╝     ╚══════╝╚═╝  ╚═╝\n`
+const ASCII_ART = `\n ██╗      ██████╗ ██╗   ██╗██╗███████╗    ██╗     ██╗   ██╗\n ██║     ██╔═══██╗██║   ██║██║██╔════╝    ██║     ██║   ██║\n ██║     ██║   ██║██║   ██║██║███████╗    ██║     ██║   ██║\n ██║     ██║   ██║██║   ██║██║╚════██║    ██║     ██║   ██║\n ███████╗╚██████╔╝╚██████╔╝██║███████║    ███████╗╚██████╔╝\n ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝╚══════╝    ╚══════╝ ╚═════╝ \n`
 console.log(`%c${ASCII_ART}`, 'color: #f97316; font-size: 12px; font-family: monospace;')
 console.log('%c Most people scroll. You inspect. I like that. ', 'background: #f97316; color: #1a1a1a; font-size: 14px; font-weight: bold; padding: 4px 8px; border-radius: 3px;')
 console.log('%cThe %cbest %cwork %cis %cinvisible.', 'color: #94a3b8; font-size: 13px;', 'color: #7e8d9d; font-size: 13px;', 'color: #687882; font-size: 13px;', 'color: #526268; font-size: 13px;', 'color: #3d4d52; font-size: 13px;')
 console.log('%cYou just found some of it.', 'color: #94a3b8; font-size: 13px;')
-console.log('%c I build the details. Let\'s solve something hard → hi@santifer.io ', 'background: #f97316; color: #1a1a1a; font-size: 13px; font-weight: bold; padding: 4px 8px; border-radius: 3px;')
+console.log('%c I build the details. Let\'s solve something hard → yl4372@columbia.edu ', 'background: #f97316; color: #1a1a1a; font-size: 13px; font-weight: bold; padding: 4px 8px; border-radius: 3px;')
 
-// Debug API for technical recruiters — type window.__santifer in console
-Object.defineProperty(window, '__santifer', {
+// Debug API for technical recruiters — type window.__louislu in console
+Object.defineProperty(window, '__louislu', {
   value: Object.freeze({
     stack: 'React 19 + TypeScript + Vite + Tailwind v4 + Motion',
     llm: 'claude-sonnet-4-5 (streaming SSE)',
     security: '6-layer defense (keywords, canary, fingerprint, anti-extraction, online scoring, adversarial)',
-    evals: '71 automated (factual, persona, safety, RAG, multilingual, multi-turn, source badges, voice)',
+    evals: 'automated (factual, persona, safety, RAG, multi-turn, source badges, voice)',
     observability: 'Langfuse (traces, LLM-as-Judge, intent tags)',
     render: 'Pre-rendered HTML + critical CSS inlined + client hydration',
     perf: () => { const n = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming; console.table({ TTFB: `${Math.round(n.responseStart - n.requestStart)}ms`, DOMContentLoaded: `${Math.round(n.domContentLoadedEventEnd - n.startTime)}ms`, Load: `${Math.round(n.loadEventEnd - n.startTime)}ms` }); },
-    hire_me: 'hola@santifer.io',
+    hire_me: 'yl4372@columbia.edu',
   }),
   configurable: false,
 })
 
 function NotFound() {
-  const { pathname } = useLocation()
-  const isEn = pathname.startsWith('/en') || /^\/[a-z]+-[a-z]+-[a-z]+/.test(pathname)
-
   useEffect(() => {
     let robots = document.querySelector('meta[name="robots"]') as HTMLMetaElement
     if (!robots) { robots = document.createElement('meta'); robots.name = 'robots'; document.head.appendChild(robots) }
     robots.content = 'noindex, nofollow'
-    document.title = '404 — Page not found | santifer.io'
+    document.title = '404 — Page not found | cv-santiago.vercel.app'
     return () => { robots.content = 'index, follow' }
   }, [])
 
@@ -143,18 +137,16 @@ function NotFound() {
     <div className="min-h-[80vh] flex flex-col items-center justify-center text-center px-6">
       <p className="text-8xl font-display font-bold text-primary mb-4">404</p>
       <h1 className="text-2xl font-display font-semibold text-foreground mb-2">
-        {isEn ? 'Page not found' : 'Página no encontrada'}
+        Page not found
       </h1>
       <p className="text-muted-foreground mb-8 max-w-md">
-        {isEn
-          ? "The page you're looking for doesn't exist or has been moved."
-          : 'La página que buscas no existe o ha sido movida.'}
+        The page you're looking for doesn't exist or has been moved.
       </p>
       <Link
-        to={isEn ? '/en' : '/'}
+        to="/"
         className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
       >
-        {isEn ? '← Back to home' : '← Volver al inicio'}
+        ← Back to home
       </Link>
     </div>
   )
@@ -169,18 +161,12 @@ const app = (
         <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<App />} />
-            <Route path="/en" element={<App />} />
             <Route path="/ops" element={<OpsDashboard />} />
-            <Route path="/sobre-mi" element={<AboutPage lang="es" />} />
-            <Route path="/about" element={<AboutPage lang="en" />} />
-            <Route path="/privacidad" element={<PrivacyPolicy lang="es" />} />
-            <Route path="/privacy" element={<PrivacyPolicy lang="en" />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
             {articleRegistry.map((article) => {
               const ArticleComponent = articleComponents[article.id]
-              return [
-                <Route key={`${article.id}-es`} path={`/${article.slugs.es}`} element={<ArticleComponent lang="es" />} />,
-                <Route key={`${article.id}-en`} path={`/${article.slugs.en}`} element={<ArticleComponent lang="en" />} />,
-              ]
+              return <Route key={article.id} path={`/${article.slug}`} element={<ArticleComponent />} />
             })}
             <Route path="*" element={<NotFound />} />
           </Routes>

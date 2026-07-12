@@ -2,11 +2,13 @@
 
 **Date:** 2025-01-15
 **Status:** Accepted
-**Decision makers:** Santiago Fernández
+**Decision makers:** Louis Lu
 
 ## Context
 
-Building a portfolio/CV site that doubles as a technical showcase. The site needs to demonstrate engineering maturity while remaining maintainable by a single developer. Key requirements: interactive AI chatbot, case study articles with rich content, bilingual (ES/EN), pre-rendered for SEO, fast time-to-interactive.
+Building a portfolio/CV site that doubles as a technical showcase. The site needs to demonstrate engineering maturity while remaining maintainable by a single developer. Key requirements: interactive AI chatbot, pre-rendered for SEO, fast time-to-interactive.
+
+_Historical note: this ADR originally described a bilingual (ES/EN) site with 7 case-study articles. Both were removed in a later migration (see `docs/portfolio-migration-plan.md`) — the site is now English-only with an empty article registry, ready for new case studies to be added._
 
 ## Decision
 

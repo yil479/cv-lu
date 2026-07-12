@@ -27,22 +27,9 @@ import AboutPage from '../src/AboutPage.tsx';
 import { aboutContent } from '../src/about-i18n.ts';
 import PrivacyPolicy from '../src/PrivacyPolicy.tsx';
 import { seo } from '../src/i18n.ts';
-import { n8nContent } from '../src/n8n-i18n.ts';
-import { jacoboContent } from '../src/jacobo-i18n.ts';
-import { businessOsContent } from '../src/business-os-i18n.ts';
-import { pseoContent } from '../src/pseo-i18n.ts';
-import { chatbotContent } from '../src/chatbot-i18n.ts';
-import { careerOpsContent } from '../src/career-ops-i18n.ts';
 
-// Map article id → i18n content for JSON-LD generation
-const i18nMap: Record<string, Record<string, { header: { h1: string }; nav: { breadcrumbHome: string; breadcrumbCurrent: string }; faq: { items: readonly { q: string; a: string }[] } }>> = {
-  'n8n-for-pms': n8nContent,
-  'jacobo': jacoboContent,
-  'business-os': businessOsContent,
-  'programmatic-seo': pseoContent,
-  'self-healing-chatbot': chatbotContent,
-  'career-ops': careerOpsContent,
-};
+// Map article id → i18n content for JSON-LD generation (empty until new articles are added)
+const i18nMap: Record<string, { header: { h1: string }; nav: { breadcrumbHome: string; breadcrumbCurrent: string }; faq: { items: readonly { q: string; a: string }[] } }> = {};
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -53,17 +40,15 @@ function stripReactSSRTags(html: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// SSR render per language (home page)
+// SSR render (home page)
 // ---------------------------------------------------------------------------
-function renderApp(lang: 'es' | 'en'): string {
-  const path = lang === 'en' ? '/en' : '/';
+function renderApp(): string {
   return stripReactSSRTags(renderToString(
-    <StaticRouter location={path}>
+    <StaticRouter location="/">
       <div>
         <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<App />} />
-            <Route path="/en" element={<App />} />
           </Routes>
         </Suspense>
       </div>
@@ -71,14 +56,14 @@ function renderApp(lang: 'es' | 'en'): string {
   ));
 }
 
-function renderArticlePage(slug: string, ArticleComponent: ComponentType<{ lang: 'es' | 'en' }>, lang: 'es' | 'en'): string {
+function renderArticlePage(slug: string, ArticleComponent: ComponentType): string {
   return stripReactSSRTags(renderToString(
     <StaticRouter location={`/${slug}`}>
       <GlobalNav />
       <div>
         <Suspense fallback={null}>
           <Routes>
-            <Route path={`/${slug}`} element={<ArticleComponent lang={lang} />} />
+            <Route path={`/${slug}`} element={<ArticleComponent />} />
           </Routes>
         </Suspense>
       </div>
@@ -104,192 +89,54 @@ try {
   process.exit(1);
 }
 
-// --- ES version (inject into existing index.html) ---
-let esHtml: string;
+// --- Home page (inject into existing index.html) ---
+let appHtml: string;
 try {
-  esHtml = renderApp('es');
+  appHtml = renderApp();
 } catch (err) {
-  console.error('[prerender] SSR failed for ES, falling back to empty root:', err);
-  esHtml = '';
+  console.error('[prerender] SSR failed for home, falling back to empty root:', err);
+  appHtml = '';
 }
 
-const esSeo = seo.es;
-
-const injectedEs = indexHtml
-  .replace('<div id="root"></div>', `<div id="root">${esHtml}</div>`)
-  .replace(/<title>[^<]*<\/title>/, `<title>${esc(esSeo.title)}</title>`)
-  .replace(/<meta name="title" content="[^"]*" \/>/, `<meta name="title" content="${esc(esSeo.title)}" />`)
-  .replace(/<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${esc(esSeo.description)}" />`)
-  .replace(/<meta property="og:title" content="[^"]*" \/>/, `<meta property="og:title" content="${esc(esSeo.title)}" />`)
-  .replace(/<meta property="og:description" content="[^"]*" \/>/, `<meta property="og:description" content="${esc(esSeo.description)}" />`)
-  .replace(/<meta name="twitter:title" content="[^"]*" \/>/, `<meta name="twitter:title" content="${esc(esSeo.title)}" />`)
-  .replace(/<meta name="twitter:description" content="[^"]*" \/>/, `<meta name="twitter:description" content="${esc(esSeo.description)}" />`);
-
-// --- EN version ---
-let enHtml: string;
-try {
-  enHtml = renderApp('en');
-} catch (err) {
-  console.error('[prerender] SSR failed for EN, falling back to empty root:', err);
-  enHtml = '';
-}
-
-const enSeo = seo.en;
-
-let enPage = indexHtml
-  .replace('<div id="root"></div>', `<div id="root">${enHtml}</div>`)
-  .replace('<html lang="es" class="dark">', '<html lang="en" class="dark">')
-  .replace(/<title>[^<]*<\/title>/, `<title>${esc(enSeo.title)}</title>`)
-  .replace(/<meta name="title" content="[^"]*" \/>/, `<meta name="title" content="${esc(enSeo.title)}" />`)
-  .replace(/<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${esc(enSeo.description)}" />`)
-  .replace(/<link rel="canonical" href="[^"]*" \/>/, '<link rel="canonical" href="https://santifer.io/en" />')
-  .replace(/<meta property="og:url" content="[^"]*" \/>/, '<meta property="og:url" content="https://santifer.io/en" />')
-  .replace(/<meta property="og:title" content="[^"]*" \/>/, `<meta property="og:title" content="${esc(enSeo.title)}" />`)
-  .replace(/<meta property="og:description" content="[^"]*" \/>/, `<meta property="og:description" content="${esc(enSeo.description)}" />`)
-  .replace(/<meta property="og:locale" content="es_ES" \/>/, '<meta property="og:locale" content="en_US" />')
-  .replace(/<meta property="og:locale:alternate" content="en_US" \/>/, '<meta property="og:locale:alternate" content="es_ES" />')
-  .replace(/<meta name="twitter:url" content="[^"]*" \/>/, '<meta name="twitter:url" content="https://santifer.io/en" />')
-  .replace(/<meta name="twitter:title" content="[^"]*" \/>/, `<meta name="twitter:title" content="${esc(enSeo.title)}" />`)
-  .replace(/<meta name="twitter:description" content="[^"]*" \/>/, `<meta name="twitter:description" content="${esc(enSeo.description)}" />`);
+const injectedHome = indexHtml
+  .replace('<div id="root"></div>', `<div id="root">${appHtml}</div>`)
+  .replace(/<title>[^<]*<\/title>/, `<title>${esc(seo.title)}</title>`)
+  .replace(/<meta name="title" content="[^"]*" \/>/, `<meta name="title" content="${esc(seo.title)}" />`)
+  .replace(/<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${esc(seo.description)}" />`)
+  .replace(/<meta property="og:title" content="[^"]*" \/>/, `<meta property="og:title" content="${esc(seo.title)}" />`)
+  .replace(/<meta property="og:description" content="[^"]*" \/>/, `<meta property="og:description" content="${esc(seo.description)}" />`)
+  .replace(/<meta name="twitter:title" content="[^"]*" \/>/, `<meta name="twitter:title" content="${esc(seo.title)}" />`)
+  .replace(/<meta name="twitter:description" content="[^"]*" \/>/, `<meta name="twitter:description" content="${esc(seo.description)}" />`);
 
 // ---------------------------------------------------------------------------
-// About / Entity Home — ES (/sobre-mi) + EN (/about)
+// About / Entity Home — /about
 // ---------------------------------------------------------------------------
 
 const aboutPersonProfile = {
   '@type': 'ProfilePage',
-  dateModified: '2026-04-28',
+  dateModified: '2026-07-09',
   mainEntity: {
     '@type': 'Person',
-    '@id': 'https://santifer.io/#person',
-    name: 'Santiago Fernández de Valderrama Aparicio',
-    alternateName: ['Santiago Fernández de Valderrama', 'santifer', 'Santi'],
-    url: 'https://santifer.io',
-    image: 'https://santifer.io/foto-avatar.png',
-    email: 'hola@santifer.io',
-    jobTitle: ['Multi-Agent Systems Builder', 'Applied AI Operator', 'Head of Applied AI', 'AI Product Manager', 'Solutions Architect (No/Low-Code & AI)', 'AI Forward Deployed Engineer'],
-    knowsAbout: [
-      { '@type': 'Thing', name: 'Artificial Intelligence', url: 'https://en.wikipedia.org/wiki/Artificial_intelligence' },
-      { '@type': 'Thing', name: 'Machine Learning', url: 'https://en.wikipedia.org/wiki/Machine_learning' },
-      { '@type': 'Thing', name: 'Multi-Agent System', url: 'https://en.wikipedia.org/wiki/Multi-agent_system' },
-      { '@type': 'Thing', name: 'Retrieval-Augmented Generation', url: 'https://en.wikipedia.org/wiki/Retrieval-augmented_generation' },
-      { '@type': 'Thing', name: 'No-code development platform', url: 'https://en.wikipedia.org/wiki/No-code_development_platform' },
-      { '@type': 'Thing', name: 'Prompt Engineering' },
-      { '@type': 'SoftwareApplication', name: 'Airtable', url: 'https://airtable.com' },
-      { '@type': 'SoftwareApplication', name: 'n8n', url: 'https://n8n.io' },
-      { '@type': 'SoftwareApplication', name: 'Claude API', url: 'https://docs.anthropic.com' },
-    ],
-    hasCredential: [
-      { '@type': 'EducationalOccupationalCredential', name: 'Introduction to Model Context Protocol', recognizedBy: { '@type': 'Organization', name: 'Anthropic' }, url: 'https://verify.skilljar.com/c/4pxam3irsioq' },
-      { '@type': 'EducationalOccupationalCredential', name: 'Claude Code in Action', recognizedBy: { '@type': 'Organization', name: 'Anthropic' }, url: 'https://verify.skilljar.com/c/eijx7hwc2x89' },
-      { '@type': 'EducationalOccupationalCredential', name: 'Advanced MCP Topics', recognizedBy: { '@type': 'Organization', name: 'Anthropic' }, url: 'https://verify.skilljar.com/c/eiovmq5qaeyd' },
-      { '@type': 'EducationalOccupationalCredential', name: 'Building with the Claude API', recognizedBy: { '@type': 'Organization', name: 'Anthropic' }, url: 'https://verify.skilljar.com/c/s4bu5znz53vm' },
-      { '@type': 'EducationalOccupationalCredential', name: 'AI Fluency: Framework & Foundations', recognizedBy: { '@type': 'Organization', name: 'Anthropic' }, url: 'https://verify.skilljar.com/c/d6rhfox7ktq6' },
-      { '@type': 'EducationalOccupationalCredential', name: 'Teaching AI Fluency', recognizedBy: { '@type': 'Organization', name: 'Anthropic' }, url: 'https://verify.skilljar.com/c/x3bzuoz99rq5' },
-      { '@type': 'EducationalOccupationalCredential', name: 'AI App Builder Certification', recognizedBy: { '@type': 'Organization', name: 'Airtable' }, url: 'https://verify.skilljar.com/c/gwg7ak9qgf7r' },
-      { '@type': 'EducationalOccupationalCredential', name: 'Airtable Builder Certification', recognizedBy: { '@type': 'Organization', name: 'Airtable' }, url: 'https://verify.skilljar.com/c/id2e4zgqtasv' },
-      { '@type': 'EducationalOccupationalCredential', name: 'Airtable Admin Certification', recognizedBy: { '@type': 'Organization', name: 'Airtable' }, url: 'https://verify.skilljar.com/c/u3r8kgn5wdit' },
-      { '@type': 'EducationalOccupationalCredential', name: 'Make Advanced', recognizedBy: { '@type': 'Organization', name: 'Make Academy' }, url: 'https://www.credly.com/badges/d27b8174-ef20-46bd-9d81-ee05e9c349e8' },
-    ],
-    alumniOf: [
-      { '@type': 'EducationalOrganization', name: 'AI Product Academy — AI PM Bootcamp', url: 'https://maven.com/marily-nika/ai-pm-bootcamp', founder: { '@type': 'Person', name: 'Dr. Marily Nika', sameAs: 'https://www.wikidata.org/wiki/Q107463356' } },
-      { '@type': 'EducationalOrganization', name: 'BIGSEO - Master en Inteligencia Artificial' },
-      { '@type': 'EducationalOrganization', name: 'ETSI - Universidad de Sevilla' },
-    ],
-    founder: {
-      '@type': 'Organization',
-      name: 'Santifer iRepair',
-      url: 'https://santiferirepair.es',
-      foundingDate: '2009',
-    },
+    '@id': 'https://cv-santiago.vercel.app/#person',
+    name: 'Louis Lu',
+    url: 'https://cv-santiago.vercel.app',
+    email: 'yl4372@columbia.edu',
+    jobTitle: ['Senior Software Engineer'],
+    knowsAbout: ['[Skill 1]', '[Skill 2]', '[Skill 3]'],
     sameAs: [
-      'https://www.linkedin.com/in/santifer',
-      'https://github.com/santifer',
-      'https://x.com/santifer',
-      'https://dev.to/santifer',
-      'https://santifer.substack.com',
-      'https://contentdigest.santifer.io',
-      'https://www.youtube.com/@santifer_io',
-      'https://stackoverflow.com/users/32541743',
-      'https://orcid.org/0009-0006-2192-7210',
-      'https://www.crunchbase.com/person/santiago-fernandez-de-valderrama',
-      'https://huggingface.co/santifer',
-      'https://www.wikidata.org/wiki/Q138710224',
-      'https://santiferirepair.es',
-      'https://career-ops.org/about',
-      'https://www.facebook.com/santifer.io/',
-      'https://www.producthunt.com/@santifer',
-      'https://app.daily.dev/santifer',
+      'https://www.linkedin.com/in/louis-lu-5b220713b/',
+      'https://github.com/yil479',
     ],
-    subjectOf: [
-      {
-        '@type': 'NewsArticle',
-        '@id': 'https://www.businessinsider.com/how-i-built-tool-filter-job-listings-landed-head-ai-2026-4',
-        headline: 'I built a tool to filter 700 listings for my job search. It got me a position as head of AI.',
-        publisher: { '@type': 'NewsMediaOrganization', name: 'Business Insider', url: 'https://www.businessinsider.com' },
-        author: { '@type': 'Person', name: 'Jordan Hart' },
-        datePublished: '2026-04-28',
-        url: 'https://www.businessinsider.com/how-i-built-tool-filter-job-listings-landed-head-ai-2026-4',
-        mainEntityOfPage: 'https://www.businessinsider.com/how-i-built-tool-filter-job-listings-landed-head-ai-2026-4',
-        inLanguage: 'en',
-      },
-      {
-        '@type': 'NewsArticle',
-        '@id': 'https://www.businessinsider.de/karriere/bewerbung/mein-ki-tool-scannt-700-job-anzeigen-so-half-es-mir-karriere-zu-machen/',
-        headline: 'Mein KI-Tool scannt 700 Job-Anzeigen — so half es mir, Karriere zu machen',
-        publisher: { '@type': 'NewsMediaOrganization', name: 'Business Insider Deutschland', url: 'https://www.businessinsider.de' },
-        datePublished: '2026-04-28',
-        url: 'https://www.businessinsider.de/karriere/bewerbung/mein-ki-tool-scannt-700-job-anzeigen-so-half-es-mir-karriere-zu-machen/',
-        mainEntityOfPage: 'https://www.businessinsider.de/karriere/bewerbung/mein-ki-tool-scannt-700-job-anzeigen-so-half-es-mir-karriere-zu-machen/',
-        inLanguage: 'de',
-        isBasedOn: 'https://www.businessinsider.com/how-i-built-tool-filter-job-listings-landed-head-ai-2026-4',
-      },
-      {
-        '@type': 'NewsArticle',
-        '@id': 'https://www.diariodesevilla.es/vivirensevilla/Salir-compras-solucion-expres-telefono_0_817718799.html',
-        headline: 'Salir de compras: Una solución exprés para el teléfono',
-        publisher: { '@type': 'NewsMediaOrganization', name: 'Diario de Sevilla' },
-        datePublished: '2014-06-19',
-        url: 'https://www.diariodesevilla.es/vivirensevilla/Salir-compras-solucion-expres-telefono_0_817718799.html',
-        mainEntityOfPage: 'https://www.diariodesevilla.es/vivirensevilla/Salir-compras-solucion-expres-telefono_0_817718799.html',
-        inLanguage: 'es',
-      },
-      {
-        '@type': 'NewsArticle',
-        '@id': 'https://wired.com.gr/article/to-ai-ergaleio-pou-fernei-epanastasi-ston-tropo-pou-psachnoume-douleia/',
-        headline: 'Το AI εργαλείο που φέρνει επανάσταση στον τρόπο που ψάχνουμε δουλειά',
-        alternativeHeadline: 'The AI tool revolutionizing the way we search for jobs',
-        publisher: { '@type': 'NewsMediaOrganization', name: 'WIRED Greece', url: 'https://wired.com.gr' },
-        author: { '@type': 'Person', name: 'Niko Efstathiou', jobTitle: 'Editor-in-Chief, WIRED Greece' },
-        datePublished: '2026-04-17',
-        dateModified: '2026-04-27',
-        url: 'https://wired.com.gr/article/to-ai-ergaleio-pou-fernei-epanastasi-ston-tropo-pou-psachnoume-douleia/',
-        mainEntityOfPage: 'https://wired.com.gr/article/to-ai-ergaleio-pou-fernei-epanastasi-ston-tropo-pou-psachnoume-douleia/',
-        inLanguage: 'el',
-      },
-      {
-        '@type': 'VideoObject',
-        name: 'Building Career-Ops to Automate the Job Hunt — Create OS Lounge with Santifer',
-        description: 'Interview with Santiago Fernández de Valderrama (santifer) on building Career-Ops, the open-source AI job search system that landed him a Head of Applied AI role.',
-        embedUrl: 'https://www.youtube.com/embed/pDkAe5JbREk',
-        url: 'https://www.youtube.com/watch?v=pDkAe5JbREk',
-        duration: 'PT24M18S',
-        datePublished: '2026-04-15',
-        publisher: { '@type': 'Organization', name: 'Create OS / Narrative Pilot' },
-        interviewer: { '@type': 'Person', name: 'Eric' },
-        inLanguage: 'en',
-      },
-    ],
-    address: { '@type': 'PostalAddress', addressLocality: 'Sevilla', addressCountry: 'ES' },
+    address: { '@type': 'PostalAddress', addressLocality: 'New York', addressCountry: 'USA' },
   },
 };
 
 /**
- * Build the per-language @graph for /about + /sobre-mi.
+ * Build the @graph for /about.
  * Includes ProfilePage + FAQPage so AI crawlers see FAQ schema in SSR'd HTML
  * (no longer requires JS execution / useEffect).
  */
-function buildAboutJsonLd(lang: 'es' | 'en', pageUrl: string, faq: readonly { q: string; a: string }[]) {
+function buildAboutJsonLd(pageUrl: string, faq: readonly { q: string; a: string }[]) {
   // Split: ProfilePage references Person by @id (not inline) so KG crawlers
   // dedupe cleanly against the canonical Person emitted on home and articles.
   // The Person itself is emitted top-level in this @graph for ID resolution
@@ -299,12 +146,12 @@ function buildAboutJsonLd(lang: 'es' | 'en', pageUrl: string, faq: readonly { q:
     '@type': 'ProfilePage',
     '@id': `${pageUrl}#profilepage`,
     dateModified: aboutPersonProfile.dateModified,
-    inLanguage: lang,
-    mainEntity: { '@id': 'https://santifer.io/#person' },
+    inLanguage: 'en',
+    mainEntity: { '@id': 'https://cv-santiago.vercel.app/#person' },
   };
   return {
     '@context': 'https://schema.org',
-    '@graph': [profile, personFull, buildFaqPage(faq, pageUrl, lang)],
+    '@graph': [profile, personFull, buildFaqPage(faq, pageUrl)],
   };
 }
 
@@ -315,15 +162,10 @@ interface AboutPageData {
 
 const aboutPages: AboutPageData[] = [];
 
-for (const lang of ['es', 'en'] as const) {
-  const t = aboutContent[lang];
+{
+  const t = aboutContent;
   const slug = t.slug;
-  const altSlug = t.altSlug;
-  const url = `https://santifer.io/${slug}`;
-  const altUrl = `https://santifer.io/${altSlug}`;
-  const altLang = lang === 'es' ? 'en' : 'es';
-  const ogLocale = lang === 'es' ? 'es_ES' : 'en_US';
-  const ogLocaleAlt = lang === 'es' ? 'en_US' : 'es_ES';
+  const url = `https://cv-santiago.vercel.app/${slug}`;
 
   let renderedHtml: string;
   try {
@@ -333,7 +175,7 @@ for (const lang of ['es', 'en'] as const) {
         <div>
           <Suspense fallback={null}>
             <Routes>
-              <Route path={`/${slug}`} element={<AboutPage lang={lang} />} />
+              <Route path={`/${slug}`} element={<AboutPage />} />
             </Routes>
           </Suspense>
         </div>
@@ -344,28 +186,22 @@ for (const lang of ['es', 'en'] as const) {
     renderedHtml = '';
   }
 
-  const hreflangLinks = `<link rel="alternate" hreflang="${lang}" href="${url}" /><link rel="alternate" hreflang="${altLang}" href="${altUrl}" /><link rel="alternate" hreflang="x-default" href="https://santifer.io/sobre-mi" />`;
-
   let result = indexHtml
     .replace('<div id="root"></div>', `<div id="root">${renderedHtml}</div>`)
-    .replace('<html lang="es" class="dark">', `<html lang="${lang}" class="dark">`)
     .replace(/<title>[^<]*<\/title>/, `<title>${esc(t.seo.title)}</title>`)
     .replace(/<meta name="title" content="[^"]*" \/>/, `<meta name="title" content="${esc(t.seo.title)}" />`)
     .replace(/<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${esc(t.seo.description)}" />`)
-    .replace(/<link rel="alternate" hreflang="[^"]*" href="[^"]*" \/>\s*/g, '')
-    .replace(/<link rel="canonical" href="[^"]*" \/>/, `<link rel="canonical" href="${url}" />${hreflangLinks}`)
+    .replace(/<link rel="canonical" href="[^"]*" \/>/, `<link rel="canonical" href="${url}" />`)
     .replace(/<meta property="og:type" content="[^"]*" \/>/, '<meta property="og:type" content="profile" />')
     .replace(/<meta property="og:url" content="[^"]*" \/>/, `<meta property="og:url" content="${url}" />`)
     .replace(/<meta property="og:title" content="[^"]*" \/>/, `<meta property="og:title" content="${esc(t.seo.title)}" />`)
     .replace(/<meta property="og:description" content="[^"]*" \/>/, `<meta property="og:description" content="${esc(t.seo.description)}" />`)
-    .replace(/<meta property="og:locale" content="es_ES" \/>/, `<meta property="og:locale" content="${ogLocale}" />`)
-    .replace(/<meta property="og:locale:alternate" content="en_US" \/>/, `<meta property="og:locale:alternate" content="${ogLocaleAlt}" />`)
     .replace(/<meta name="twitter:url" content="[^"]*" \/>/, `<meta name="twitter:url" content="${url}" />`)
     .replace(/<meta name="twitter:title" content="[^"]*" \/>/, `<meta name="twitter:title" content="${esc(t.seo.title)}" />`)
     .replace(/<meta name="twitter:description" content="[^"]*" \/>/, `<meta name="twitter:description" content="${esc(t.seo.description)}" />`);
 
-  // Build per-language @graph (ProfilePage + FAQPage) and inject as SSR JSON-LD
-  const aboutJsonLd = buildAboutJsonLd(lang, url, t.faq);
+  // Build @graph (ProfilePage + FAQPage) and inject as SSR JSON-LD
+  const aboutJsonLd = buildAboutJsonLd(url, t.faq);
   const aboutJsonLdScript = `<script type="application/ld+json">\n${JSON.stringify(aboutJsonLd, null, 2)}\n</script>`;
 
   // Replace homepage JSON-LD with ProfilePage + FAQPage @graph
@@ -387,50 +223,35 @@ interface ArticlePage {
 
 function buildArticlePage(
   config: ArticleConfig,
-  lang: 'es' | 'en',
-  ArticleComponent: ComponentType<{ lang: 'es' | 'en' }>,
+  ArticleComponent: ComponentType,
 ): string {
-  const slug = config.slugs[lang];
-  const altSlug = config.slugs[lang === 'es' ? 'en' : 'es'];
-  const url = `https://santifer.io/${slug}`;
-  const altUrl = `https://santifer.io/${altSlug}`;
-  const altLang = lang === 'es' ? 'en' : 'es';
-  const htmlLang = lang;
-  const ogLocale = lang === 'es' ? 'es_ES' : 'en_US';
-  const ogLocaleAlt = lang === 'es' ? 'en_US' : 'es_ES';
-  const articleSeo = config.seo[lang];
-  const xDefaultHref = `https://santifer.io/${config.xDefaultSlug || config.slugs.es}`;
+  const slug = config.slug;
+  const url = `https://cv-santiago.vercel.app/${slug}`;
+  const articleSeo = config.seo;
 
   let renderedHtml: string;
   try {
-    renderedHtml = renderArticlePage(slug, ArticleComponent, lang);
+    renderedHtml = renderArticlePage(slug, ArticleComponent);
   } catch (err) {
     console.error(`[prerender] SSR failed for ${slug}, falling back to empty root:`, err);
     renderedHtml = '';
   }
 
-  const hreflangLinks = `<link rel="alternate" hreflang="${lang}" href="${url}" /><link rel="alternate" hreflang="${altLang}" href="${altUrl}" /><link rel="alternate" hreflang="x-default" href="${xDefaultHref}" />`;
-
   let result = indexHtml
     .replace('<div id="root"></div>', `<div id="root">${renderedHtml}</div>`)
-    .replace('<html lang="es" class="dark">', `<html lang="${htmlLang}" class="dark">`)
     .replace(/<title>[^<]*<\/title>/, `<title>${esc(articleSeo.title)}</title>`)
     .replace(/<meta name="title" content="[^"]*" \/>/, `<meta name="title" content="${esc(articleSeo.title)}" />`)
     .replace(/<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${esc(articleSeo.description)}" />`)
-    // Remove home hreflang tags before injecting article-specific ones
-    .replace(/<link rel="alternate" hreflang="[^"]*" href="[^"]*" \/>\s*/g, '')
-    .replace(/<link rel="canonical" href="[^"]*" \/>/, `<link rel="canonical" href="${url}" />${hreflangLinks}`)
+    .replace(/<link rel="canonical" href="[^"]*" \/>/, `<link rel="canonical" href="${url}" />`)
     .replace(/<meta property="og:type" content="[^"]*" \/>/, '<meta property="og:type" content="article" />')
     .replace(/<meta property="og:url" content="[^"]*" \/>/, `<meta property="og:url" content="${url}" />`)
     .replace(/<meta property="og:title" content="[^"]*" \/>/, `<meta property="og:title" content="${esc(articleSeo.title)}" />`)
     .replace(/<meta property="og:description" content="[^"]*" \/>/, `<meta property="og:description" content="${esc(articleSeo.description)}" />`)
-    .replace(/<meta property="og:locale" content="es_ES" \/>/, `<meta property="og:locale" content="${ogLocale}" />`)
-    .replace(/<meta property="og:locale:alternate" content="en_US" \/>/, `<meta property="og:locale:alternate" content="${ogLocaleAlt}" />`)
     .replace(/<meta name="twitter:url" content="[^"]*" \/>/, `<meta name="twitter:url" content="${url}" />`)
     .replace(/<meta name="twitter:title" content="[^"]*" \/>/, `<meta name="twitter:title" content="${esc(articleSeo.title)}" />`)
     .replace(/<meta name="twitter:description" content="[^"]*" \/>/, `<meta name="twitter:description" content="${esc(articleSeo.description)}" />`)
     // OG image — replace with article-specific image if configured
-    .replace(/<meta property="og:image" content="[^"]*" \/>/, `<meta property="og:image" content="${esc(config.ogImage || 'https://santifer.io/og-image.webp')}" />`)
+    .replace(/<meta property="og:image" content="[^"]*" \/>/, `<meta property="og:image" content="${esc(config.ogImage || 'https://cv-santiago.vercel.app/og-image.webp')}" />`)
     .replace(/<meta property="og:image:alt" content="[^"]*" \/>/, `<meta property="og:image:alt" content="${esc(articleSeo.title)}" />`)
     .replace(/<meta name="twitter:image" content="[^"]*" \/>/, config.ogImage ? `<meta name="twitter:image" content="${esc(config.ogImage)}" />` : '');
 
@@ -440,49 +261,44 @@ function buildArticlePage(
     const articleMetaTags = [
       `<meta property="article:published_time" content="${seoMeta.datePublished}" />`,
       `<meta property="article:modified_time" content="${seoMeta.dateModified}" />`,
-      `<meta property="article:author" content="https://www.linkedin.com/in/santifer" />`,
+      `<meta property="article:author" content="https://www.linkedin.com/in/louis-lu-5b220713b/" />`,
       `<meta property="article:tag" content="${esc(seoMeta.articleTags)}" />`,
     ].join('\n    ');
     result = result.replace('</head>', `    ${articleMetaTags}\n  </head>`);
   }
 
   // Inject article JSON-LD (replace homepage Person/WebSite schema)
-  const i18n = i18nMap[config.id];
-  if (seoMeta && i18n) {
-    const t = i18n[lang];
-    if (t) {
-      const jsonLd = buildArticleJsonLd({
-        lang,
-        url: `https://santifer.io/${slug}`,
-        altUrl: `https://santifer.io/${altSlug}`,
-        headline: t.header.h1,
-        alternativeHeadline: articleSeo.title,
-        description: articleSeo.description,
-        datePublished: seoMeta.datePublished,
-        dateModified: seoMeta.dateModified,
-        keywords: seoMeta.keywords,
-        images: config.heroImage ? [config.heroImage] : seoMeta.images,
-        breadcrumbHome: t.nav.breadcrumbHome,
-        breadcrumbCurrent: t.nav.breadcrumbCurrent,
-        faq: t.faq.items,
-        articleType: seoMeta.articleType,
-        about: seoMeta.about,
-        extra: seoMeta.extra,
-        citation: seoMeta.citation,
-        isBasedOn: seoMeta.isBasedOn,
-        mentions: seoMeta.mentions,
-        discussionUrl: seoMeta.discussionUrl,
-        relatedLink: seoMeta.relatedLink,
-        video: seoMeta.video,
-        subjectOf: seoMeta.subjectOf,
-      });
-      const jsonLdScript = `<script type="application/ld+json">\n${JSON.stringify(jsonLd, null, 2)}\n</script>`;
-      // Replace the homepage JSON-LD with article-specific one
-      result = result.replace(
-        /<script type="application\/ld\+json">[\s\S]*?<\/script>/,
-        jsonLdScript,
-      );
-    }
+  const t = i18nMap[config.id];
+  if (seoMeta && t) {
+    const jsonLd = buildArticleJsonLd({
+      url,
+      headline: t.header.h1,
+      alternativeHeadline: articleSeo.title,
+      description: articleSeo.description,
+      datePublished: seoMeta.datePublished,
+      dateModified: seoMeta.dateModified,
+      keywords: seoMeta.keywords,
+      images: config.heroImage ? [config.heroImage] : seoMeta.images,
+      breadcrumbHome: t.nav.breadcrumbHome,
+      breadcrumbCurrent: t.nav.breadcrumbCurrent,
+      faq: t.faq.items,
+      articleType: seoMeta.articleType,
+      about: seoMeta.about,
+      extra: seoMeta.extra,
+      citation: seoMeta.citation,
+      isBasedOn: seoMeta.isBasedOn,
+      mentions: seoMeta.mentions,
+      discussionUrl: seoMeta.discussionUrl,
+      relatedLink: seoMeta.relatedLink,
+      video: seoMeta.video,
+      subjectOf: seoMeta.subjectOf,
+    });
+    const jsonLdScript = `<script type="application/ld+json">\n${JSON.stringify(jsonLd, null, 2)}\n</script>`;
+    // Replace the homepage JSON-LD with article-specific one
+    result = result.replace(
+      /<script type="application\/ld\+json">[\s\S]*?<\/script>/,
+      jsonLdScript,
+    );
   }
 
   return result;
@@ -492,7 +308,7 @@ function buildArticlePage(
 const articlePages: ArticlePage[] = [];
 
 for (const config of articleRegistry) {
-  let ArticleComponent: ComponentType<{ lang: 'es' | 'en' }>;
+  let ArticleComponent: ComponentType;
   try {
     const mod = await config.component();
     ArticleComponent = mod.default;
@@ -501,14 +317,8 @@ for (const config of articleRegistry) {
     continue;
   }
 
-  const seen = new Set<string>();
-  for (const lang of ['es', 'en'] as const) {
-    const slug = config.slugs[lang];
-    if (seen.has(slug)) continue; // same slug for both languages
-    seen.add(slug);
-    const html = buildArticlePage(config, lang, ArticleComponent);
-    articlePages.push({ slug, html });
-  }
+  const html = buildArticlePage(config, ArticleComponent);
+  articlePages.push({ slug: config.slug, html });
 }
 
 // ---------------------------------------------------------------------------
@@ -561,9 +371,9 @@ function swapLcpPreload(html: string, isArticle: boolean): string {
 async function writePage(html: string, outputPath: string, label: string) {
   const dir = dirname(outputPath);
   mkdirSync(dir, { recursive: true });
-  // Article pages live in dist/<slug>/index.html, NOT dist/index.html or dist/en/index.html
+  // Article pages live in dist/<slug>/index.html, NOT dist/index.html
   const isArticle = /\/dist\/[^/]+\/index\.html$/.test(outputPath)
-    && !/\/dist\/(en|privacy|privacidad)\/index\.html$/.test(outputPath);
+    && !/\/dist\/privacy\/index\.html$/.test(outputPath);
   const pre = swapLcpPreload(html, isArticle);
   try {
     const processed = dedupePreloads(await critters.process(pre));
@@ -576,18 +386,15 @@ async function writePage(html: string, outputPath: string, label: string) {
 }
 
 // ---------------------------------------------------------------------------
-// Privacy pages — /privacidad (ES) + /privacy (EN)
+// Privacy page — /privacy
 // ---------------------------------------------------------------------------
 const privacyPages: { slug: string; html: string }[] = [];
 
-for (const [lang, slug, altSlug] of [['es', 'privacidad', 'privacy'], ['en', 'privacy', 'privacidad']] as const) {
-  const url = `https://santifer.io/${slug}`;
-  const altUrl = `https://santifer.io/${altSlug}`;
-  const altLang = lang === 'es' ? 'en' : 'es';
-  const title = lang === 'es' ? 'Política de Privacidad | santifer.io' : 'Privacy Policy | santifer.io';
-  const description = lang === 'es'
-    ? 'Política de privacidad de santifer.io. Cómo se recopilan y utilizan los datos del chatbot y la web.'
-    : 'Privacy policy for santifer.io. How chatbot and website data is collected and used.';
+{
+  const slug = 'privacy';
+  const url = `https://cv-santiago.vercel.app/${slug}`;
+  const title = 'Privacy Policy | cv-santiago.vercel.app';
+  const description = 'Privacy policy for cv-santiago.vercel.app. How chatbot and website data is collected and used.';
 
   let renderedHtml: string;
   try {
@@ -597,7 +404,7 @@ for (const [lang, slug, altSlug] of [['es', 'privacidad', 'privacy'], ['en', 'pr
         <div>
           <Suspense fallback={null}>
             <Routes>
-              <Route path={`/${slug}`} element={<PrivacyPolicy lang={lang} />} />
+              <Route path={`/${slug}`} element={<PrivacyPolicy />} />
             </Routes>
           </Suspense>
         </div>
@@ -608,38 +415,31 @@ for (const [lang, slug, altSlug] of [['es', 'privacidad', 'privacy'], ['en', 'pr
     renderedHtml = '';
   }
 
-  const hreflangLinks = `<link rel="alternate" hreflang="${lang}" href="${url}" /><link rel="alternate" hreflang="${altLang}" href="${altUrl}" /><link rel="alternate" hreflang="x-default" href="https://santifer.io/privacidad" />`;
-
   let result = indexHtml
     .replace('<div id="root"></div>', `<div id="root">${renderedHtml}</div>`)
-    .replace('<html lang="es" class="dark">', `<html lang="${lang}" class="dark">`)
     .replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`)
     .replace(/<meta name="title" content="[^"]*" \/>/, `<meta name="title" content="${esc(title)}" />`)
     .replace(/<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${esc(description)}" />`)
     .replace(/<meta name="robots" content="[^"]*" \/>/, '<meta name="robots" content="noindex, nofollow" />')
-    .replace(/<link rel="alternate" hreflang="[^"]*" href="[^"]*" \/>\s*/g, '')
-    .replace(/<link rel="canonical" href="[^"]*" \/>/, `<link rel="canonical" href="${url}" />${hreflangLinks}`)
+    .replace(/<link rel="canonical" href="[^"]*" \/>/, `<link rel="canonical" href="${url}" />`)
     .replace(/<meta property="og:url" content="[^"]*" \/>/, `<meta property="og:url" content="${url}" />`)
     .replace(/<meta property="og:title" content="[^"]*" \/>/, `<meta property="og:title" content="${esc(title)}" />`)
     .replace(/<meta property="og:description" content="[^"]*" \/>/, `<meta property="og:description" content="${esc(description)}" />`)
-    .replace(/<meta property="og:locale" content="es_ES" \/>/, `<meta property="og:locale" content="${lang === 'es' ? 'es_ES' : 'en_US'}" />`)
-    .replace(/<meta property="og:locale:alternate" content="en_US" \/>/, `<meta property="og:locale:alternate" content="${lang === 'es' ? 'en_US' : 'es_ES'}" />`)
     .replace(/<meta name="twitter:url" content="[^"]*" \/>/, `<meta name="twitter:url" content="${url}" />`)
     .replace(/<meta name="twitter:title" content="[^"]*" \/>/, `<meta name="twitter:title" content="${esc(title)}" />`)
     .replace(/<meta name="twitter:description" content="[^"]*" \/>/, `<meta name="twitter:description" content="${esc(description)}" />`);
 
-  // Remove homepage JSON-LD (privacy pages don't need structured data)
+  // Remove homepage JSON-LD (privacy page doesn't need structured data)
   result = result.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '');
 
   privacyPages.push({ slug, html: result });
 }
 
 async function inlineCriticalCSS() {
-  // Home pages
-  await writePage(injectedEs, indexPath, 'ES: dist/index.html updated');
-  await writePage(enPage, resolve(distDir, 'en', 'index.html'), 'EN: dist/en/index.html created');
+  // Home page
+  await writePage(injectedHome, indexPath, 'Home: dist/index.html updated');
 
-  // About pages
+  // About page
   for (const { slug, html } of aboutPages) {
     await writePage(html, resolve(distDir, slug, 'index.html'), `${slug}: dist/${slug}/index.html created`);
   }
@@ -649,7 +449,7 @@ async function inlineCriticalCSS() {
     await writePage(html, resolve(distDir, slug, 'index.html'), `${slug}: dist/${slug}/index.html created`);
   }
 
-  // Privacy pages
+  // Privacy page
   for (const { slug, html } of privacyPages) {
     await writePage(html, resolve(distDir, slug, 'index.html'), `${slug}: dist/${slug}/index.html created`);
   }
@@ -663,7 +463,7 @@ await inlineCriticalCSS();
 const notFoundHtml = indexHtml
   .replace('<div id="root"></div>', `<div id="root"><div style="min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 1.5rem"><p style="font-size:6rem;font-weight:bold;color:var(--primary);margin-bottom:1rem;font-family:var(--font-display)">404</p><h1 style="font-size:1.5rem;font-weight:600;color:var(--foreground);margin-bottom:0.5rem">Page not found</h1><p style="color:var(--muted-foreground);margin-bottom:2rem;max-width:28rem">The page you're looking for doesn't exist or has been moved.</p><a href="/" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.5rem;border-radius:0.75rem;background:var(--primary);color:var(--primary-foreground);font-weight:500;text-decoration:none">← Back to home</a></div></div>`)
   .replace(/<meta name="robots" content="[^"]*" \/>/, '<meta name="robots" content="noindex, nofollow" />')
-  .replace(/<title>[^<]*<\/title>/, '<title>404 — Page not found | santifer.io</title>');
+  .replace(/<title>[^<]*<\/title>/, '<title>404 — Page not found | cv-santiago.vercel.app</title>');
 
 // Add noindex if no robots meta exists
 if (!notFoundHtml.includes('name="robots"')) {
@@ -695,9 +495,8 @@ function validateHydrationStructure(html: string, label: string) {
   }
 }
 
-// Validate home pages
-validateHydrationStructure(injectedEs, 'home-es');
-validateHydrationStructure(enPage, 'home-en');
+// Validate home page
+validateHydrationStructure(injectedHome, 'home');
 
 // Validate about pages
 for (const { slug, html } of aboutPages) {

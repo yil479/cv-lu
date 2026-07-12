@@ -2,7 +2,7 @@
  * Auto-generates sitemap.xml from the article registry.
  *
  * Runs as part of the build pipeline (after vite build, before prerender).
- * Ensures every registered article has proper <url> entries with hreflang.
+ * Ensures every registered article has a proper <url> entry.
  *
  * Usage:
  *   npx tsx --tsconfig tsconfig.app.json scripts/generate-sitemap.ts
@@ -46,9 +46,6 @@ const aboutLastmod = lastmodFromGit(['src/AboutPage.tsx', 'src/about-i18n.ts'])
 
 interface SitemapUrl {
   loc: string
-  hreflangEs: string
-  hreflangEn: string
-  xDefault: string
   lastmod: string
   /** Kept for type-compat with existing call-sites; not emitted (Google ignores since 2017). */
   priority?: string
@@ -57,9 +54,6 @@ interface SitemapUrl {
 function urlBlock(u: SitemapUrl): string {
   return `  <url>
     <loc>${u.loc}</loc>
-    <xhtml:link rel="alternate" hreflang="es" href="${u.hreflangEs}"/>
-    <xhtml:link rel="alternate" hreflang="en" href="${u.hreflangEn}"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="${u.xDefault}"/>
     <lastmod>${u.lastmod}</lastmod>
   </url>`
 }
@@ -68,74 +62,28 @@ function urlBlock(u: SitemapUrl): string {
 // Build URLs
 // ---------------------------------------------------------------------------
 
-const base = 'https://santifer.io'
+const base = 'https://cv-santiago.vercel.app'
 const urls: SitemapUrl[] = []
 
-// Home ES + EN
 urls.push({
   loc: `${base}/`,
-  hreflangEs: `${base}/`,
-  hreflangEn: `${base}/en`,
-  xDefault: `${base}/`,
   lastmod: homeLastmod,
   priority: '1.0',
 })
-urls.push({
-  loc: `${base}/en`,
-  hreflangEs: `${base}/`,
-  hreflangEn: `${base}/en`,
-  xDefault: `${base}/`,
-  lastmod: homeLastmod,
-  priority: '0.9',
-})
 
-// About / Entity Home — ES + EN
-urls.push({
-  loc: `${base}/sobre-mi`,
-  hreflangEs: `${base}/sobre-mi`,
-  hreflangEn: `${base}/about`,
-  xDefault: `${base}/sobre-mi`,
-  lastmod: aboutLastmod,
-  priority: '0.9',
-})
 urls.push({
   loc: `${base}/about`,
-  hreflangEs: `${base}/sobre-mi`,
-  hreflangEn: `${base}/about`,
-  xDefault: `${base}/sobre-mi`,
   lastmod: aboutLastmod,
   priority: '0.9',
 })
 
 // Articles from registry
 for (const article of articleRegistry) {
-  const esUrl = `${base}/${article.slugs.es}`
-  const enUrl = `${base}/${article.slugs.en}`
-  const xDefault = `${base}/${article.xDefaultSlug ?? article.slugs.es}`
-
-  const articleLastmod = article.seoMeta?.dateModified ?? today
-
-  // ES version
   urls.push({
-    loc: esUrl,
-    hreflangEs: esUrl,
-    hreflangEn: enUrl,
-    xDefault,
-    lastmod: articleLastmod,
+    loc: `${base}/${article.slug}`,
+    lastmod: article.seoMeta?.dateModified ?? today,
     priority: '0.8',
   })
-
-  // EN version (skip if same slug — already covered)
-  if (article.slugs.en !== article.slugs.es) {
-    urls.push({
-      loc: enUrl,
-      hreflangEs: esUrl,
-      hreflangEn: enUrl,
-      xDefault,
-      lastmod: articleLastmod,
-      priority: '0.8',
-    })
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -143,8 +91,7 @@ for (const article of articleRegistry) {
 // ---------------------------------------------------------------------------
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(urlBlock).join('\n')}
 </urlset>
 `

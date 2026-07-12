@@ -1,22 +1,19 @@
 import { articleRegistry } from './registry'
 
-type Lang = 'es' | 'en'
-
 /**
  * Shared FAQPage builder. Used by buildArticleJsonLd (case studies) and
- * by prerender.tsx for /about + /sobre-mi. Centralizing here means any
- * page with a `faq` array gets schema-compliant FAQPage SSR'd into the
- * prerendered HTML — invisible-FAQ-on-pageload bugs cannot recur.
+ * by prerender.tsx for /about. Centralizing here means any page with a
+ * `faq` array gets schema-compliant FAQPage SSR'd into the prerendered
+ * HTML — invisible-FAQ-on-pageload bugs cannot recur.
  */
 export function buildFaqPage(
   faq: readonly { q: string; a: string }[],
   pageUrl: string,
-  lang: Lang,
 ) {
   return {
     '@type': 'FAQPage',
     '@id': `${pageUrl.replace(/\/$/, '')}/#faq`,
-    inLanguage: lang,
+    inLanguage: 'en',
     mainEntity: faq.map((item) => ({
       '@type': 'Question',
       name: item.q,
@@ -26,9 +23,7 @@ export function buildFaqPage(
 }
 
 interface JsonLdOptions {
-  lang: Lang
   url: string
-  altUrl: string
   headline: string
   alternativeHeadline: string
   description: string
@@ -66,40 +61,25 @@ interface JsonLdOptions {
 
 const PERSON = {
   '@type': 'Person',
-  '@id': 'https://santifer.io/#person',
-  name: 'Santiago Fernández de Valderrama Aparicio',
-  url: 'https://santifer.io',
-  jobTitle: 'Head of Applied AI',
+  '@id': 'https://cv-santiago.vercel.app/#person',
+  name: 'Louis Lu',
+  url: 'https://cv-santiago.vercel.app',
+  jobTitle: 'Senior Software Engineer',
   sameAs: [
-    'https://www.linkedin.com/in/santifer',
-    'https://github.com/santifer',
-    'https://x.com/santifer',
-    'https://dev.to/santifer',
-    'https://santifer.substack.com',
-    'https://contentdigest.santifer.io',
-    'https://www.youtube.com/@santifer_io',
-    'https://stackoverflow.com/users/32541743',
-    'https://orcid.org/0009-0006-2192-7210',
-    'https://www.crunchbase.com/person/santiago-fernandez-de-valderrama',
-    'https://huggingface.co/santifer',
-    'https://www.wikidata.org/wiki/Q138710224',
-    'https://santiferirepair.es',
-    'https://career-ops.org/about',
-    'https://www.facebook.com/santifer.io/',
-    'https://www.producthunt.com/@santifer',
-    'https://app.daily.dev/santifer',
+    'https://www.linkedin.com/in/louis-lu-5b220713b/',
+    'https://github.com/yil479',
   ],
 }
 
 const WEBSITE = {
   '@type': 'WebSite',
-  '@id': 'https://santifer.io/#website',
-  name: 'santifer.io',
-  url: 'https://santifer.io',
+  '@id': 'https://cv-santiago.vercel.app/#website',
+  name: 'cv-santiago.vercel.app',
+  url: 'https://cv-santiago.vercel.app',
 }
 
 export function buildArticleJsonLd(opts: JsonLdOptions) {
-  const inLanguage = opts.lang === 'es' ? 'es' : 'en'
+  const inLanguage = 'en'
 
   const graph: Record<string, unknown>[] = [
     {
@@ -108,12 +88,12 @@ export function buildArticleJsonLd(opts: JsonLdOptions) {
       headline: opts.headline,
       alternativeHeadline: opts.alternativeHeadline,
       description: opts.description,
-      author: { '@id': 'https://santifer.io/#person' },
+      author: { '@id': 'https://cv-santiago.vercel.app/#person' },
       // Publisher: Person-as-publisher is valid for CreativeWork on personal sites
-      // (Santiago publishes on his own domain). Override only for collabs (e.g. Marily).
+      // (you publish on your own domain). Override only for collabs with other authors.
       publisher: opts.publisher
         ? { '@type': 'Organization', name: opts.publisher.name, url: opts.publisher.url }
-        : { '@id': 'https://santifer.io/#person' },
+        : { '@id': 'https://cv-santiago.vercel.app/#person' },
       datePublished: opts.datePublished,
       dateModified: opts.dateModified,
       keywords: opts.keywords,
@@ -121,7 +101,7 @@ export function buildArticleJsonLd(opts: JsonLdOptions) {
       mainEntityOfPage: opts.url,
       image: opts.images,
       inLanguage,
-      isPartOf: { '@id': 'https://santifer.io/#website' },
+      isPartOf: { '@id': 'https://cv-santiago.vercel.app/#website' },
       ...(opts.about ? { about: opts.about } : {}),
       ...(opts.extra || {}),
       ...(opts.citation ? { citation: opts.citation } : {}),
@@ -131,7 +111,6 @@ export function buildArticleJsonLd(opts: JsonLdOptions) {
       ...(opts.relatedLink ? { relatedLink: opts.relatedLink } : {}),
       ...(opts.video ? { video: opts.video } : {}),
       ...(opts.subjectOf ? { subjectOf: opts.subjectOf } : {}),
-      workTranslation: { '@id': `${opts.altUrl}/#article` },
     },
     PERSON,
     WEBSITE,
@@ -139,14 +118,14 @@ export function buildArticleJsonLd(opts: JsonLdOptions) {
       '@type': 'BreadcrumbList',
       '@id': `${opts.url}/#breadcrumbs`,
       itemListElement: [
-        { '@type': 'ListItem', '@id': `${opts.url}/#breadcrumb-1`, position: 1, name: opts.breadcrumbHome, item: 'https://santifer.io' },
+        { '@type': 'ListItem', '@id': `${opts.url}/#breadcrumb-1`, position: 1, name: opts.breadcrumbHome, item: 'https://cv-santiago.vercel.app' },
         { '@type': 'ListItem', '@id': `${opts.url}/#breadcrumb-2`, position: 2, name: opts.breadcrumbCurrent, item: opts.url },
       ],
     },
   ]
 
   if (opts.faq && opts.faq.length > 0) {
-    graph.push(buildFaqPage(opts.faq, opts.url, opts.lang))
+    graph.push(buildFaqPage(opts.faq, opts.url))
   }
 
   // HowTo schema removed — deprecated by Google Sept 2023
@@ -164,12 +143,10 @@ export function buildArticleJsonLd(opts: JsonLdOptions) {
  */
 export function buildJsonLdFromRegistry(
   articleId: string,
-  lang: Lang,
   i18n: {
     header: { h1: string }
     seo: { title: string; description: string }
     slug: string
-    altSlug: string
     nav: { breadcrumbHome: string; breadcrumbCurrent: string }
     faq: { items: readonly { q: string; a: string }[] }
   },
@@ -180,9 +157,7 @@ export function buildJsonLdFromRegistry(
 
   const meta = config.seoMeta
   return buildArticleJsonLd({
-    lang,
-    url: `https://santifer.io/${i18n.slug}`,
-    altUrl: `https://santifer.io/${i18n.altSlug}`,
+    url: `https://cv-santiago.vercel.app/${i18n.slug}`,
     headline: i18n.header.h1,
     alternativeHeadline: i18n.seo.title,
     description: i18n.seo.description,

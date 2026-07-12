@@ -10,7 +10,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 // Cargar .env.local si existe (para ANTHROPIC_API_KEY del LLM Judge)
-const envLocalPath = path.join(import.meta.dirname, '.env.local')
+const envLocalPath = path.join(import.meta.dirname, '..', '.env.local')
 if (fs.existsSync(envLocalPath)) {
   const envContent = fs.readFileSync(envLocalPath, 'utf-8')
   for (const line of envContent.split('\n')) {
@@ -389,7 +389,7 @@ async function main() {
     )
     console.log(`${colors.dim}   Options:${colors.reset}`)
     console.log(`${colors.dim}   1. Run 'vercel dev' (serves edge functions on port 3000)${colors.reset}`)
-    console.log(`${colors.dim}   2. Test against production: CHAT_API_URL=https://santifer.io/api/chat npm run evals${colors.reset}`)
+    console.log(`${colors.dim}   2. Test against production: CHAT_API_URL=https://cv-santiago.vercel.app/api/chat npm run evals${colors.reset}`)
     process.exit(1)
   }
 

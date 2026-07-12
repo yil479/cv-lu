@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <!--
-  OG image template for santifer.io (1200x630).
+  OG image template for cv-santiago.vercel.app (1200x630).
   Rendered to public/og-image.webp by scripts/generate-og-image.ts (Playwright + cwebp).
   Replicates the home hero design tokens 1:1 (no AI-invented styling).
-  Placeholders resolved at render time: __FONT_SG__ __FONT_DM__ __AVATAR__ __STARS__
-  To change copy, edit the markup below — the script only injects the star count.
+  Placeholders resolved at render time: __FONT_SG__ __FONT_DM__
+  Text-only card (no avatar/photo yet, no star-count badge — this isn't an OSS project).
 -->
 <html lang="en">
 <head>
@@ -33,8 +33,7 @@
     color: hsl(0 0% 93%);
     display: flex;
     align-items: center;
-    gap: 64px;
-    padding: 0 90px;
+    padding: 0 100px;
     overflow: hidden;
     position: relative;
   }
@@ -47,29 +46,11 @@
     background: radial-gradient(circle, hsl(270 91% 78% / 0.10), transparent 70%);
     pointer-events: none;
   }
-  .avatar-wrap { position: relative; flex-shrink: 0; }
-  .avatar {
-    width: 300px; height: 300px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid hsl(187 86% 53% / 0.35);
-    box-shadow: 0 0 0 10px hsl(187 86% 53% / 0.06);
-  }
-  .badge {
-    position: absolute;
-    right: 14px; bottom: 14px;
-    width: 64px; height: 64px;
-    border-radius: 50%;
-    background: hsl(187 86% 53%);
-    border: 5px solid hsl(240 6% 10%);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .badge svg { width: 34px; height: 34px; }
   .content { display: flex; flex-direction: column; }
   .greeting {
-    font-size: 30px;
+    font-size: 32px;
     color: hsl(0 0% 62%);
-    margin-bottom: 14px;
+    margin-bottom: 16px;
     font-weight: 500;
   }
   .greeting .handle {
@@ -81,7 +62,7 @@
   }
   h1 {
     font-family: 'Space Grotesk', system-ui, sans-serif;
-    font-size: 70px;
+    font-size: 76px;
     line-height: 1.04;
     font-weight: 700;
     letter-spacing: -0.02em;
@@ -89,25 +70,22 @@
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    margin-bottom: 18px;
+    margin-bottom: 22px;
   }
   .sub {
     font-family: 'DM Sans', system-ui, sans-serif;
-    font-size: 32px;
+    font-size: 34px;
     line-height: 1.32;
     font-weight: 500;
     color: hsl(0 0% 82%);
     letter-spacing: -0.005em;
-    margin-bottom: 32px;
+    margin-bottom: 36px;
   }
-  .sub .stars { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
-  .sub .star { width: 26px; height: 26px; color: hsl(45 93% 58%); vertical-align: middle; }
-  .sub .num { font-weight: 700; color: hsl(0 0% 95%); }
   .pills { display: flex; gap: 12px; align-items: center; }
   .pill {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 500;
-    padding: 9px 18px;
+    padding: 10px 20px;
     border-radius: 9999px;
     backdrop-filter: blur(4px);
     white-space: nowrap;
@@ -133,23 +111,15 @@
 </style>
 </head>
 <body>
-  <div class="avatar-wrap">
-    <img class="avatar" src="__AVATAR__" alt="" />
-    <div class="badge">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M5 12.5l4.5 4.5L19 7.5" stroke="hsl(240 6% 10%)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
-  </div>
   <div class="content">
-    <div class="greeting">Hi, I'm <span class="handle">@santifer</span></div>
-    <h1>Multi-Agent<br/>Systems Engineer</h1>
-    <div class="sub">I build production AI agents.<br/>Open-sourced career-ops, <span class="stars"><svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z"/></svg><span class="num" data-og-stars-k>__STARS__</span></span></div>
+    <div class="greeting">Hi, I'm <span class="handle">Louis Lu</span></div>
+    <h1>Senior Software Engineer</h1>
+    <div class="sub">Applied AI/ML · Production RAG Systems</div>
     <div class="pills">
-      <span class="pill solid">Applied AI · FDE</span>
-      <span class="pill ghost">Founder · exited</span>
+      <span class="pill solid">Senior SWE</span>
+      <span class="pill ghost">Applied AI/ML</span>
     </div>
   </div>
-  <div class="domain">santifer.io</div>
+  <div class="domain">cv-santiago.vercel.app</div>
 </body>
 </html>

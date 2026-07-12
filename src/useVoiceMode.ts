@@ -364,7 +364,7 @@ export function useVoiceMode() {
       addDebug('Connecting WS to OpenAI...');
       const ws = new WebSocket(
         'wss://api.openai.com/v1/realtime?model=gpt-realtime-2025-08-28',
-        ['realtime', `openai-insecure-api-key.${token}`, 'openai-beta.realtime-v1'],
+        ['realtime', `openai-insecure-api-key.${token}`],
       );
       wsRef.current = ws;
 
@@ -375,16 +375,21 @@ export function useVoiceMode() {
         ws.send(JSON.stringify({
           type: 'session.update',
           session: {
-            turn_detection: {
-              type: 'server_vad',
-              threshold: 0.5,
-              prefix_padding_ms: 300,
-              silence_duration_ms: 500,
-              create_response: true,
-              interrupt_response: true,
+            type: 'realtime',
+            audio: {
+              input: {
+                format: { type: 'audio/pcm', rate: 24000 },
+                transcription: { model: 'whisper-1' },
+                turn_detection: {
+                  type: 'server_vad',
+                  threshold: 0.5,
+                  prefix_padding_ms: 300,
+                  silence_duration_ms: 500,
+                  create_response: true,
+                  interrupt_response: true,
+                },
+              },
             },
-            input_audio_format: 'pcm16',
-            input_audio_transcription: { model: 'whisper-1' },
           },
         }));
 
@@ -392,7 +397,7 @@ export function useVoiceMode() {
         if (history.length > 0) {
           const historyText = history
             .filter(m => m.content && m.content.trim())
-            .map(m => `${m.role === 'user' ? 'User' : 'Santiago'}: ${m.content}`)
+            .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
             .join('\n');
 
           if (historyText) {
@@ -550,7 +555,7 @@ export function useVoiceMode() {
   // Handle events from OpenAI Realtime API
   const handleRealtimeEvent = useCallback((data: Record<string, unknown>, ws: WebSocket, lang: string, sessionId: string) => {
     // Log all events for debugging (remove in production)
-    if (data.type !== 'response.audio.delta' && data.type !== 'input_audio_buffer.speech_started') {
+    if (data.type !== 'response.output_audio.delta' && data.type !== 'input_audio_buffer.speech_started') {
       console.log('[Voice]', data.type, data.type === 'error' ? data.error : '');
     }
 
@@ -593,7 +598,7 @@ export function useVoiceMode() {
         break;
       }
 
-      case 'response.audio.delta': {
+      case 'response.output_audio.delta': {
         stopThinkingSound();
         setStatus('speaking');
         setIsSearching(false);
@@ -619,13 +624,13 @@ export function useVoiceMode() {
         break;
       }
 
-      case 'response.audio_transcript.delta': {
+      case 'response.output_audio_transcript.delta': {
         // Accumulate transcript text — subtitle loop reads from ref to pace display
         currentTranscriptRef.current += (data.delta as string) || '';
         break;
       }
 
-      case 'response.audio_transcript.done': {
+      case 'response.output_audio_transcript.done': {
         const text = (data.transcript as string) || currentTranscriptRef.current;
         if (text?.trim()) {
           setTranscript(prev => [...prev, { role: 'assistant', text: text.trim() }]);

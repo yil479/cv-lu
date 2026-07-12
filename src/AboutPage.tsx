@@ -1,30 +1,19 @@
 import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { MapPin, Mail, ExternalLink, Award, GraduationCap, Briefcase, ChevronRight, Clock, Newspaper, HelpCircle, Users } from 'lucide-react'
-import { aboutContent, type AboutLang } from './about-i18n'
+import { MapPin, Mail, ExternalLink, Award, GraduationCap, Clock, HelpCircle } from 'lucide-react'
+import { aboutContent } from './about-i18n'
 
 // `rel: 'me'` is the IndieAuth standard for declaring profiles/sites the person controls.
 // Used here for cross-domain entity ownership signals (parsed by Mastodon, Bluesky, KG crawlers).
 const SOCIAL_LINKS: { name: string; url: string; rel?: string }[] = [
-  { name: 'Career-Ops', url: 'https://career-ops.org', rel: 'me noopener noreferrer' },
-  { name: 'LinkedIn', url: 'https://www.linkedin.com/in/santifer', rel: 'me noopener noreferrer' },
-  { name: 'GitHub', url: 'https://github.com/santifer', rel: 'me noopener noreferrer' },
-  { name: 'YouTube', url: 'https://www.youtube.com/@santifer_io', rel: 'me noopener noreferrer' },
-  { name: 'X / Twitter', url: 'https://x.com/santifer', rel: 'me noopener noreferrer' },
-  { name: 'Dev.to', url: 'https://dev.to/santifer', rel: 'me noopener noreferrer' },
-  { name: 'Substack', url: 'https://santifer.substack.com', rel: 'me noopener noreferrer' },
-  { name: 'Stack Overflow', url: 'https://stackoverflow.com/users/32541743', rel: 'me noopener noreferrer' },
-  { name: 'ORCID', url: 'https://orcid.org/0009-0006-2192-7210', rel: 'me noopener noreferrer' },
-  { name: 'Crunchbase', url: 'https://www.crunchbase.com/person/santiago-fernandez-de-valderrama' },
-  { name: 'Wikidata', url: 'https://www.wikidata.org/wiki/Q138710224' },
+  { name: 'LinkedIn', url: 'https://www.linkedin.com/in/louis-lu-5b220713b/', rel: 'me noopener noreferrer' },
+  { name: 'GitHub', url: 'https://github.com/yil479', rel: 'me noopener noreferrer' },
 ]
 
-export default function AboutPage({ lang = 'es' }: { lang?: AboutLang }) {
-  const t = aboutContent[lang]
-  const altSlug = t.altSlug
+export default function AboutPage() {
+  const t = aboutContent
 
   useEffect(() => {
-    document.documentElement.lang = lang
+    document.documentElement.lang = 'en'
     document.title = t.seo.title
 
     let desc = document.querySelector('meta[name="description"]') as HTMLMetaElement
@@ -33,31 +22,13 @@ export default function AboutPage({ lang = 'es' }: { lang?: AboutLang }) {
 
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement
     if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical) }
-    canonical.href = `https://santifer.io/${t.slug}`
-
-    const hreflangs = [
-      { lang: 'es', href: 'https://santifer.io/sobre-mi' },
-      { lang: 'en', href: 'https://santifer.io/about' },
-      { lang: 'x-default', href: 'https://santifer.io/sobre-mi' },
-    ]
-    document.querySelectorAll('link[hreflang]').forEach(el => el.remove())
-    for (const hl of hreflangs) {
-      const link = document.createElement('link')
-      link.rel = 'alternate'
-      link.hreflang = hl.lang
-      link.href = hl.href
-      document.head.appendChild(link)
-    }
+    canonical.href = `https://cv-santiago.vercel.app/${t.slug}`
 
     // ProfilePage + FAQPage JSON-LD now SSR'd by prerender (scripts/prerender.tsx → buildAboutJsonLd).
     // No useEffect injection needed for SEO. SPA-navigated visits keep the prerendered HTML's
     // JSON-LD if user lands on /about first; otherwise the homepage's JSON-LD persists which is
     // acceptable since AI crawlers always do fresh fetches (they don't SPA-navigate).
-
-    return () => {
-      document.querySelectorAll('link[hreflang]').forEach(el => el.remove())
-    }
-  }, [lang, t])
+  }, [t])
 
   return (
     <div className="min-h-screen bg-background text-foreground bg-[length:24px_24px] [background-image:radial-gradient(circle,hsl(var(--dot-grid))_1px,transparent_1px)]">
@@ -65,15 +36,6 @@ export default function AboutPage({ lang = 'es' }: { lang?: AboutLang }) {
 
         {/* Header */}
         <header className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-10">
-          <img
-            src="/foto-avatar-sm.webp"
-            srcSet="/foto-avatar-sm.webp 192w, /foto-avatar.webp 384w"
-            sizes="96px"
-            alt="Santiago Fernández de Valderrama"
-            className="w-24 h-24 rounded-full border-2 border-border shadow-lg"
-            width={96}
-            height={96}
-          />
           <div className="text-center sm:text-left">
             <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-1">
               {t.heading}
@@ -93,7 +55,7 @@ export default function AboutPage({ lang = 'es' }: { lang?: AboutLang }) {
         </header>
 
         {/* Manifesto */}
-        <blockquote cite="https://santifer.io/career-ops" className="mb-10 border-l-4 border-primary pl-6 pr-4 py-3 text-xl md:text-2xl italic font-display leading-snug text-foreground/90">
+        <blockquote className="mb-10 border-l-4 border-primary pl-6 pr-4 py-3 text-xl md:text-2xl italic font-display leading-snug text-foreground/90">
           {t.manifesto}
         </blockquote>
 
@@ -139,30 +101,8 @@ export default function AboutPage({ lang = 'es' }: { lang?: AboutLang }) {
           </div>
         </section>
 
-        {/* Projects */}
-        <section className="mb-10">
-          <h2 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-            <Briefcase className="w-4 h-4 text-primary" />
-            {t.projectsHeading}
-          </h2>
-          <div className="space-y-2">
-            {t.projects.map((project) => (
-              <Link
-                key={project.name}
-                to={project.href}
-                className="flex items-center justify-between p-3 rounded-lg bg-card border border-border hover:border-primary/30 hover:bg-primary/5 transition-all group"
-              >
-                <div>
-                  <p className="font-medium text-foreground text-sm group-hover:text-primary transition-colors">{project.name}</p>
-                  <p className="text-xs text-muted-foreground">{project.desc}</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
-              </Link>
-            ))}
-          </div>
-        </section>
-
         {/* Certifications */}
+        {t.certifications.length > 0 && (
         <section className="mb-10">
           <h2 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
             <Award className="w-4 h-4 text-primary" />
@@ -181,6 +121,7 @@ export default function AboutPage({ lang = 'es' }: { lang?: AboutLang }) {
             ))}
           </div>
         </section>
+        )}
 
         {/* Education */}
         <section className="mb-10">
@@ -193,54 +134,6 @@ export default function AboutPage({ lang = 'es' }: { lang?: AboutLang }) {
               <li key={item} className="text-sm text-muted-foreground">{item}</li>
             ))}
           </ul>
-        </section>
-
-        {/* Press */}
-        <section className="mb-10">
-          <h2 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-            <Newspaper className="w-4 h-4 text-primary" />
-            {t.pressHeading}
-          </h2>
-          {t.press.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              target="_blank"
-              rel="noopener noreferrer nofollow"
-              className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border hover:border-primary/30 transition-all group"
-            >
-              <div>
-                <p className="font-medium text-foreground text-sm group-hover:text-primary transition-colors">{item.title}</p>
-                <p className="text-xs text-muted-foreground">{item.publisher} · {item.date}</p>
-              </div>
-              <ExternalLink className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-            </a>
-          ))}
-        </section>
-
-        {/* Community */}
-        <section className="mb-10">
-          <h2 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-            <Users className="w-4 h-4 text-primary" />
-            {t.communityHeading}
-          </h2>
-          <div className="space-y-2">
-            {t.community.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between p-3 rounded-lg bg-card border border-border hover:border-primary/30 transition-all group"
-              >
-                <div>
-                  <p className="font-medium text-foreground text-sm group-hover:text-primary transition-colors">{item.title}</p>
-                  <p className="text-xs text-muted-foreground">{item.platform}</p>
-                </div>
-                <ExternalLink className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-              </a>
-            ))}
-          </div>
         </section>
 
         {/* FAQ */}
@@ -290,20 +183,10 @@ export default function AboutPage({ lang = 'es' }: { lang?: AboutLang }) {
           </div>
         </section>
 
-        {/* Language toggle */}
-        <div className="text-center pt-6 border-t border-border">
-          <Link
-            to={`/${altSlug}`}
-            className="text-sm text-muted-foreground hover:text-primary transition-colors"
-          >
-            {lang === 'es' ? 'Read in English →' : 'Leer en Español →'}
-          </Link>
-        </div>
-
         {/* Footer */}
-        <footer className="mt-8 text-center">
+        <footer className="mt-8 pt-6 border-t border-border text-center">
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} Santiago Fernández de Valderrama. {lang === 'es' ? 'Todos los derechos reservados.' : 'All rights reserved.'}
+            &copy; {new Date().getFullYear()} Louis Lu. All rights reserved.
           </p>
         </footer>
       </main>

@@ -1,19 +1,18 @@
 /* TEAM */
-Builder: Santiago Fernandez de Valderrama Aparicio
-Role: Head of Applied AI · AI Product Manager · Solutions Architect
-Contact: hi@santifer.io
-Site: https://santifer.io
-Location: Seville, Spain
-LinkedIn: https://linkedin.com/in/santifer
-GitHub: https://github.com/santifer
+Builder: Louis Lu
+Role: Senior Software Engineer
+Contact: yl4372@columbia.edu
+Site: https://cv-santiago.vercel.app
+Location: New York, NY
+LinkedIn: https://linkedin.com/in/louis-lu-5b220713b
+GitHub: https://github.com/yil479
 
 /* THANKS */
 AI Pair: Claude Code (Anthropic)
 
 /* SITE */
 Stack: React 19, TypeScript, Vite, Tailwind CSS, Motion
-AI: Claude API (claude-sonnet-4-6), streaming via Vercel Edge
-Quality: 71 evals, 6-layer security, Langfuse observability, closed-loop quality
+AI: Claude API, streaming via Vercel Edge
 Hosting: Vercel
 Standards: llms.txt, security.txt, JSON-LD, Open Graph
 
@@ -21,4 +20,4 @@ Standards: llms.txt, security.txt, JSON-LD, Open Graph
 Performance: Lighthouse 100, pre-rendered SSR, critical CSS inlining
 Security: CSP, input sanitization, prompt injection defense, rate limiting
 Accessibility: Semantic HTML, ARIA labels, keyboard navigation
-SEO: Programmatic meta tags, structured data, sitemap, hreflang
+SEO: Programmatic meta tags, structured data, sitemap

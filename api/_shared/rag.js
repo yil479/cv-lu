@@ -226,15 +226,10 @@ export function extractSources(chunks) {
   return sources
 }
 
-// Keywords that signal the response actually references a given article
-export const ARTICLE_KEYWORDS = {
-  'n8n-for-pms':          ['n8n', 'nodemation'],
-  'jacobo':               ['jacobo', 'agente ia', 'ai agent', 'whatsapp', 'multi-agent', 'multiagent'],
-  'business-os':          ['business os', 'erp', 'airtable bases', 'crm', 'inventory'],
-  'programmatic-seo':     ['seo programático', 'programmatic seo', 'web programática', 'programmatic web', 'decision engine', 'indexable', 'dataforseo', 'seo pipeline', 'seo automatizado', 'automated seo'],
-  'self-healing-chatbot': ['chatbot', 'this chat', 'este chat', 'evals', 'self-healing', 'closed-loop', 'langfuse', 'rag'],
-  'santifer-irepair':     ['santifer irepair', 'irepair', 'repair business', 'taller de reparación'],
-}
+// Keywords that signal the response actually references a given article.
+// Empty until new articles are registered in src/articles/registry.ts —
+// add an entry here (id -> keyword list) for each one.
+export const ARTICLE_KEYWORDS = {}
 
 /** Filter RAG sources to only articles actually mentioned in the response, max 3 */
 export function filterSourcesByResponse(sources, responseText) {
@@ -247,24 +242,18 @@ export function filterSourcesByResponse(sources, responseText) {
   }).slice(0, 3)
 }
 
-// Static article routes — used to generate badges from keywords regardless of RAG
-export const ARTICLE_ROUTES = {
-  'n8n-for-pms':          { page_path_es: '/n8n-para-pms', page_path_en: '/n8n-for-pms' },
-  'jacobo':               { page_path_es: '/agente-ia-jacobo', page_path_en: '/ai-agent-jacobo' },
-  'business-os':          { page_path_es: '/business-os-para-airtable', page_path_en: '/business-os-for-airtable' },
-  'programmatic-seo':     { page_path_es: '/seo-programatico', page_path_en: '/programmatic-seo' },
-  'self-healing-chatbot': { page_path_es: '/chatbot-que-se-cura-solo', page_path_en: '/self-healing-chatbot' },
-  'santifer-irepair':     { page_path_es: '/santifer-irepair', page_path_en: '/santifer-irepair-founder' },
-}
+// Static article routes — used to generate badges from keywords regardless of RAG.
+// Empty until new articles are registered — add an entry per article id.
+export const ARTICLE_ROUTES = {}
 
 // Home fallback
 export const HOME_SOURCE = {
   article_id: 'home',
   section_id: 'portfolio',
   section_anchor: '',
-  page_path_en: '/en',
+  page_path_en: '/',
   page_path_es: '/',
-  article_slug_en: 'en',
+  article_slug_en: '',
   article_slug_es: '',
 }
 
@@ -409,7 +398,7 @@ export function classifyIntent(text) {
     tags.push('jailbreak-attempt')
   }
 
-  if (/experiencia|experience|trabajo|work|career|carrera|santifer|irepair/.test(lower)) tags.push('topic:experience')
+  if (/experiencia|experience|trabajo|work|career|carrera/.test(lower)) tags.push('topic:experience')
   if (/proyecto|project|portfolio|github|código|code/.test(lower)) tags.push('topic:projects')
   if (/contact|contacto|email|linkedin|hablar|talk|hire|contratar/.test(lower)) tags.push('topic:contact')
   if (/stack|tech|tecnolog|python|react|airtable|claude|ai|ia|llm|agente|agent/.test(lower)) tags.push('topic:technical')
@@ -433,9 +422,9 @@ export async function sendJailbreakAlert(userMessage) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'Santi Bot <onboarding@resend.dev>',
+      from: 'Portfolio Bot <onboarding@resend.dev>',
       to: process.env.ALERT_EMAIL,
-      subject: '🚨 JAILBREAK ATTEMPT - santifer.io',
+      subject: '🚨 JAILBREAK ATTEMPT - cv-santiago.vercel.app',
       html: `
         <h2>🚨 Jailbreak Attempt Detected</h2>
         <p><strong>Time:</strong> ${new Date().toISOString()}</p>

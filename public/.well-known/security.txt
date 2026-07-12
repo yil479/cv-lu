@@ -1,9 +1,9 @@
-# Security Policy for santifer.io
+# Security Policy for cv-santiago.vercel.app
 # https://securitytxt.org/ — RFC 9116
 
-Contact: mailto:hi@santifer.io
-Preferred-Languages: en, es
-Canonical: https://santifer.io/.well-known/security.txt
+Contact: mailto:yl4372@columbia.edu
+Preferred-Languages: en
+Canonical: https://cv-santiago.vercel.app/.well-known/security.txt
 Expires: 2027-02-19T00:00:00.000Z
 
 # Security measures implemented:
