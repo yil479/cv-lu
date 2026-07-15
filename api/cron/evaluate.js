@@ -6,13 +6,15 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk'
-import { Langfuse } from 'langfuse'
 import { Resend } from 'resend'
+import { getLangfuse } from '../_shared/langfuse-client.js'
 
 export const config = {
   runtime: 'nodejs',
   maxDuration: 60,
 }
+
+const JUDGE_MODEL = 'claude-sonnet-4-5-20250929'
 
 const EVALUATOR_PROMPT = `You are an evaluator for a chatbot that represents Louis Lu, Senior Software Engineer based in New York, NY.
 
@@ -82,11 +84,7 @@ export default async function handler(req) {
     return new Response('Unauthorized', { status: 401 })
   }
 
-  const langfuse = new Langfuse({
-    publicKey: process.env.LANGFUSE_PUBLIC_KEY,
-    secretKey: process.env.LANGFUSE_SECRET_KEY,
-    baseUrl: process.env.LANGFUSE_BASE_URL,
-  })
+  const langfuse = getLangfuse()
 
   const anthropic = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
@@ -107,9 +105,7 @@ export default async function handler(req) {
         const userMessage = trace.metadata?.lastUserMessage
         if (!userMessage) continue
 
-        const observations = await langfuse.fetchObservations({ traceId: trace.id })
-        const generation = observations.data.find(o => o.type === 'GENERATION')
-        const assistantResponse = generation?.output
+        const assistantResponse = trace.output
         if (!assistantResponse) continue
 
         const scores = await langfuse.fetchScores({ traceId: trace.id })
@@ -120,13 +116,28 @@ export default async function handler(req) {
           .replace('{user_message}', userMessage)
           .replace('{assistant_response}', assistantResponse)
 
+        const judgeGen = langfuse?.generation({
+          traceId: trace.id,
+          name: 'batch_judge',
+          model: JUDGE_MODEL,
+          input: { userMessage, assistantResponse },
+        })
+
         const response = await anthropic.messages.create({
-          model: 'claude-sonnet-4-5-20250929',
+          model: JUDGE_MODEL,
           max_tokens: 300,
           messages: [{ role: 'user', content: prompt }],
         })
 
         const text = response.content[0].type === 'text' ? response.content[0].text : ''
+        judgeGen?.end({
+          output: text,
+          usage: {
+            input: response.usage?.input_tokens || 0,
+            output: response.usage?.output_tokens || 0,
+          },
+        })
+
         const jsonMatch = text.match(/\{[\s\S]*\}/)
         if (!jsonMatch) continue
 

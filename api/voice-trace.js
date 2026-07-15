@@ -1,22 +1,13 @@
-import { Langfuse } from 'langfuse'
 import { waitUntil } from '@vercel/functions'
 import { classifyIntent, containsFingerprint, sendJailbreakAlert } from './_shared/rag.js'
+import { getLangfuse } from './_shared/langfuse-client.js'
 
 export const config = {
   runtime: 'edge',
 }
 
-let langfuseClient = null
-function getLangfuse() {
-  if (!langfuseClient && process.env.LANGFUSE_SECRET_KEY) {
-    langfuseClient = new Langfuse({
-      publicKey: process.env.LANGFUSE_PUBLIC_KEY,
-      secretKey: process.env.LANGFUSE_SECRET_KEY,
-      baseUrl: process.env.LANGFUSE_BASE_URL,
-    })
-  }
-  return langfuseClient
-}
+// Must match the model requested in voice-token.js's Realtime session
+const VOICE_MODEL = 'gpt-realtime-2025-08-28'
 
 export default async function handler(req) {
   if (req.method !== 'POST') {
@@ -77,6 +68,7 @@ export default async function handler(req) {
     const trace = langfuse.trace({ id: traceId })
     trace.update({
       sessionId: sessionId || undefined,
+      output: assistantMessages.join('\n'),
       tags: [...allTags],
       metadata: {
         durationMs,
@@ -96,6 +88,7 @@ export default async function handler(req) {
     // Add transcript as a generation
     trace.generation({
       name: 'voice-transcript',
+      model: VOICE_MODEL,
       input: userMessages.join('\n'),
       output: assistantMessages.join('\n'),
       metadata: {

@@ -238,11 +238,9 @@ async function main() {
 
   for (const trace of recentTraces) {
     try {
-      // Get the user message and assistant response from metadata/observations
+      // Get the user message and assistant response from trace-level input/output
       const userMessage = trace.metadata?.lastUserMessage as string
-      const observations = await langfuse.fetchObservations({ traceId: trace.id })
-      const generation = observations.data.find(o => o.type === 'GENERATION')
-      const assistantResponse = generation?.output as string || ''
+      const assistantResponse = trace.output as string || ''
 
       if (!userMessage || !assistantResponse) {
         console.log(`⏭️  Skipping ${trace.id.slice(0, 8)}... (missing data)`)

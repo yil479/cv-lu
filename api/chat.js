@@ -1,5 +1,4 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { Langfuse } from 'langfuse'
 import { waitUntil } from '@vercel/functions'
 import SYSTEM_PROMPT_FALLBACK from '../chatbot-prompt.txt'
 import {
@@ -9,26 +8,13 @@ import {
   containsFingerprint, LEAK_RESPONSE,
 } from './_shared/rag.js'
 import { getSystemPrompt } from './_shared/prompt.js'
+import { getLangfuse } from './_shared/langfuse-client.js'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
-// ---------------------------------------------------------------------------
-// Langfuse
-// ---------------------------------------------------------------------------
-
-let langfuseClient = null
-function getLangfuse() {
-  if (!langfuseClient && process.env.LANGFUSE_SECRET_KEY) {
-    langfuseClient = new Langfuse({
-      publicKey: process.env.LANGFUSE_PUBLIC_KEY,
-      secretKey: process.env.LANGFUSE_SECRET_KEY,
-      baseUrl: process.env.LANGFUSE_BASE_URL,
-    })
-  }
-  return langfuseClient
-}
+const MODEL = 'claude-sonnet-4-6'
 
 // ---------------------------------------------------------------------------
 // Handler
@@ -100,6 +86,7 @@ export default async function handler(req) {
       trace = langfuse.trace({
         name: 'chat',
         sessionId: sessionId || undefined,
+        input: lastUserMessage,
         tags: [lang, ...intentTags],
         metadata: {
           lang,
@@ -150,11 +137,11 @@ export default async function handler(req) {
 
     if (ragEnabled) {
       // First call: let Claude decide if it needs to search (non-streaming)
-      const toolDecisionSpan = trace?.span({ name: 'tool_decision' })
+      const toolDecisionGen = trace?.generation({ name: 'tool_decision', model: MODEL, input: lastUserMessage })
       const td0 = Date.now()
 
       const firstResponse = await client.messages.create({
-        model: 'claude-sonnet-4-6',
+        model: MODEL,
         max_tokens: 300,
         system: systemBlocks,
         messages: cleanMessages,
@@ -164,20 +151,22 @@ export default async function handler(req) {
       const toolDecisionMs = Date.now() - td0
       const tdInputTokens = firstResponse.usage?.input_tokens || 0
       const tdOutputTokens = firstResponse.usage?.output_tokens || 0
-      toolDecisionSpan?.end({
+      const toolUseBlock = firstResponse.content.find(b => b.type === 'tool_use')
+      toolDecisionGen?.end({
+        output: firstResponse.stop_reason === 'tool_use'
+          ? { tool: toolUseBlock?.name, query: toolUseBlock?.input?.query }
+          : firstResponse.content.find(b => b.type === 'text')?.text,
+        usage: { input: tdInputTokens, output: tdOutputTokens },
         metadata: {
           stopReason: firstResponse.stop_reason,
           toolUsed: firstResponse.stop_reason === 'tool_use',
-          inputTokens: tdInputTokens,
-          outputTokens: tdOutputTokens,
           latencyMs: toolDecisionMs,
-          cost: calcCost('claude-sonnet-4-6', tdInputTokens, tdOutputTokens),
+          cost: calcCost(MODEL, tdInputTokens, tdOutputTokens),
         },
       })
 
       if (firstResponse.stop_reason === 'tool_use') {
         ragUsed = true
-        const toolUseBlock = firstResponse.content.find(b => b.type === 'tool_use')
         const searchQuery = toolUseBlock?.input?.query || lastUserMessage
 
         // Execute RAG pipeline
@@ -306,8 +295,10 @@ function streamResponse({
   let leakDetected = false
   let generationCost = 0
 
-  const generationSpan = trace?.span({
+  const generationGen = trace?.generation({
     name: 'generation',
+    model: MODEL,
+    input: lastUserMessage,
     metadata: { ragUsed, streaming: !precomputedResponse },
   })
 
@@ -315,7 +306,7 @@ function streamResponse({
   let stream = null
   if (!precomputedResponse) {
     const streamParams = {
-      model: 'claude-sonnet-4-6',
+      model: MODEL,
       max_tokens: 800,
       system: systemBlocks,
       messages,
@@ -347,7 +338,7 @@ function streamResponse({
             controller.enqueue(encoder.encode('data: [DONE]\n\n'))
             controller.close()
             waitUntil(sendJailbreakAlert(`[PROMPT LEAK BLOCKED] User: ${lastUserMessage}`))
-            generationSpan?.end({ metadata: { blocked: true } })
+            generationGen?.end({ metadata: { blocked: true } })
             if (langfuse) waitUntil(langfuse.flushAsync())
             return
           }
@@ -372,11 +363,11 @@ function streamResponse({
 
           const pcIn = precomputedResponse.usage?.input_tokens || 0
           const pcOut = precomputedResponse.usage?.output_tokens || 0
-          generationCost = calcCost('claude-sonnet-4-6', pcIn, pcOut)
-          generationSpan?.end({
+          generationCost = calcCost(MODEL, pcIn, pcOut)
+          generationGen?.end({
+            output: precomputedText,
+            usage: { input: pcIn, output: pcOut },
             metadata: {
-              outputTokens: pcOut,
-              inputTokens: pcIn,
               latencyMs: Date.now() - t0,
               cost: generationCost,
             },
@@ -391,7 +382,7 @@ function streamResponse({
             try {
               // Create fresh stream for each attempt
               const activeStream = attempt === 0 ? stream : client.messages.stream({
-                model: 'claude-sonnet-4-6',
+                model: MODEL,
                 max_tokens: 800,
                 system: systemBlocks,
                 messages,
@@ -415,7 +406,7 @@ function streamResponse({
                       controller.enqueue(encoder.encode('data: [DONE]\n\n'))
                       controller.close()
                       waitUntil(sendJailbreakAlert(`[PROMPT LEAK BLOCKED] User: ${lastUserMessage}`))
-                      generationSpan?.end({ metadata: { blocked: true } })
+                      generationGen?.end({ metadata: { blocked: true } })
                       if (langfuse) waitUntil(langfuse.flushAsync())
                       return
                     }
@@ -429,11 +420,11 @@ function streamResponse({
                 const finalMessage = await activeStream.finalMessage()
                 const genIn = finalMessage.usage?.input_tokens || 0
                 const genOut = finalMessage.usage?.output_tokens || 0
-                generationCost = calcCost('claude-sonnet-4-6', genIn, genOut)
-                generationSpan?.end({
+                generationCost = calcCost(MODEL, genIn, genOut)
+                generationGen?.end({
+                  output: fullOutput,
+                  usage: { input: genIn, output: genOut },
                   metadata: {
-                    outputTokens: genOut,
-                    inputTokens: genIn,
                     latencyMs: Date.now() - t0,
                     attempt,
                     cost: generationCost,
@@ -475,7 +466,7 @@ function streamResponse({
         if (!leakDetected) {
           // Calculate total cost across all spans
           const costBreakdown = {
-            toolDecision: calcCost('claude-sonnet-4-6', tdInputTokens || 0, tdOutputTokens || 0),
+            toolDecision: calcCost(MODEL, tdInputTokens || 0, tdOutputTokens || 0),
             embedding: calcCost('text-embedding-3-small', ragUsage?.embeddingTokens || 0),
             reranking: calcCost('claude-haiku-4-5-20251001', ragUsage?.rerankInputTokens || 0, ragUsage?.rerankOutputTokens || 0),
             generation: generationCost,
@@ -484,6 +475,7 @@ function streamResponse({
 
           // Update trace with RAG metadata + cost + prompt version + conversation
           trace?.update({
+            output: fullOutput,
             tags: [...intentTags, ragUsed ? 'rag:yes' : 'rag:no'],
             metadata: {
               ragUsed,
@@ -537,14 +529,14 @@ function streamResponse({
           controller.close()
         }
       } catch (error) {
-        generationSpan?.end({ metadata: { error: error.message } })
+        generationGen?.end({ metadata: { error: error.message } })
         trace?.update({ tags: [...intentTags, 'rag:fallback'], metadata: { streamingError: error.message } })
 
         // Graceful degradation: retry without RAG context (just system prompt)
         if (fallbackMessages && !fullOutput) {
           try {
             const fallbackStream = client.messages.stream({
-              model: 'claude-sonnet-4-6',
+              model: MODEL,
               max_tokens: 800,
               system: systemBlocks,
               messages: fallbackMessages,
@@ -626,6 +618,7 @@ async function scoreTrace(traceId, userMessage, response, ragUsed, langfuse) {
       traceId,
       name: 'online_scoring',
       model: 'claude-haiku-4-5-20251001',
+      input: { userMessage, response },
     })
 
     const scoringResponse = await client.messages.create({
@@ -649,11 +642,12 @@ JSON only: {"quality":0.0,"safety":0.0${ragUsed ? ',"faithfulness":0.0' : ''}}`
 
     const scIn = scoringResponse.usage?.input_tokens || 0
     const scOut = scoringResponse.usage?.output_tokens || 0
+    const text = scoringResponse.content[0]?.type === 'text' ? scoringResponse.content[0].text : ''
     scoringGen.end({
+      output: text,
       usage: { input: scIn, output: scOut },
     })
 
-    const text = scoringResponse.content[0]?.type === 'text' ? scoringResponse.content[0].text : ''
     const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (!jsonMatch) return
 

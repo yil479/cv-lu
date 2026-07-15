@@ -1,24 +1,10 @@
-import { Langfuse } from 'langfuse'
+import { getLangfuse } from './_shared/langfuse-client.js'
 
 export const config = {
   runtime: 'edge',
 }
 
-// ---------------------------------------------------------------------------
-// Langfuse (singleton)
-// ---------------------------------------------------------------------------
-
-let langfuseClient = null
-function getLangfuse() {
-  if (!langfuseClient && process.env.LANGFUSE_SECRET_KEY) {
-    langfuseClient = new Langfuse({
-      publicKey: process.env.LANGFUSE_PUBLIC_KEY,
-      secretKey: process.env.LANGFUSE_SECRET_KEY,
-      baseUrl: process.env.LANGFUSE_BASE_URL,
-    })
-  }
-  return langfuseClient
-}
+export const VOICE_MODEL = 'gpt-realtime-2025-08-28'
 
 // ---------------------------------------------------------------------------
 // Rate limiting via Supabase
@@ -215,7 +201,7 @@ export default async function handler(req) {
       body: JSON.stringify({
         session: {
           type: 'realtime',
-          model: 'gpt-realtime-2025-08-28',
+          model: VOICE_MODEL,
           instructions,
           audio: {
             input: {

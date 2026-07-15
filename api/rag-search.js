@@ -1,10 +1,10 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { Langfuse } from 'langfuse'
 import {
   searchPortfolio, formatChunksForContext, extractSources, calcCost,
   filterSourcesByResponse, detectMentionedArticles, HOME_SOURCE,
 } from './_shared/rag.js'
 import { getSystemPrompt } from './_shared/prompt.js'
+import { getLangfuse } from './_shared/langfuse-client.js'
 
 export const config = {
   runtime: 'edge',
@@ -14,17 +14,7 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
-let langfuseClient = null
-function getLangfuse() {
-  if (!langfuseClient && process.env.LANGFUSE_SECRET_KEY) {
-    langfuseClient = new Langfuse({
-      publicKey: process.env.LANGFUSE_PUBLIC_KEY,
-      secretKey: process.env.LANGFUSE_SECRET_KEY,
-      baseUrl: process.env.LANGFUSE_BASE_URL,
-    })
-  }
-  return langfuseClient
-}
+const MODEL = 'claude-sonnet-4-6'
 
 // ---------------------------------------------------------------------------
 // Claude reasoning layer — turns raw RAG chunks into a verified answer
@@ -34,14 +24,14 @@ const VOICE_OVERRIDE = `Response for a spoken conversation. Max 2-3 sentences. N
 
 async function reasonWithClaude(query, formattedChunks, span, langfuse) {
   const t0 = Date.now()
-  const reasoningSpan = span?.span({ name: 'claude-reasoning', metadata: { query } })
+  const reasoningGen = span?.generation({ name: 'claude-reasoning', model: MODEL, input: query })
 
   try {
     const { text: systemPromptText } = await getSystemPrompt(langfuse)
 
     const response = await Promise.race([
       client.messages.create({
-        model: 'claude-sonnet-4-6',
+        model: MODEL,
         max_tokens: 300,
         system: `${systemPromptText}\n\n${VOICE_OVERRIDE}`,
         messages: [
@@ -77,18 +67,18 @@ async function reasonWithClaude(query, formattedChunks, span, langfuse) {
     const outputTokens = response.usage?.output_tokens || 0
     const latencyMs = Date.now() - t0
 
-    reasoningSpan?.end({
+    reasoningGen?.end({
+      output: answer,
+      usage: { input: inputTokens, output: outputTokens },
       metadata: {
-        inputTokens,
-        outputTokens,
         latencyMs,
-        cost: calcCost('claude-sonnet-4-6', inputTokens, outputTokens),
+        cost: calcCost(MODEL, inputTokens, outputTokens),
       },
     })
 
     return answer || null
   } catch (err) {
-    reasoningSpan?.end({ metadata: { error: err.message, latencyMs: Date.now() - t0 } })
+    reasoningGen?.end({ metadata: { error: err.message, latencyMs: Date.now() - t0 } })
     return null // fallback to raw chunks
   }
 }
@@ -125,7 +115,7 @@ export default async function handler(req) {
     if (langfuse && traceId) {
       trace = langfuse.trace({ id: traceId })
     }
-    const ragSpan = trace?.span({ name: 'voice-rag', metadata: { query } })
+    const ragSpan = trace?.span({ name: 'voice-rag', input: query, metadata: { query } })
 
     const t0 = Date.now()
 
@@ -139,6 +129,7 @@ export default async function handler(req) {
       const sources = ragResult.sources || []
 
       ragSpan?.end({
+        output: formattedChunks,
         metadata: {
           chunksFound: ragResult.chunks?.length || 0,
           degraded: ragResult.degraded,
