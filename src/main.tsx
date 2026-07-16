@@ -179,9 +179,16 @@ const app = (
   </StrictMode>
 )
 
-// Hydrate if pre-rendered content exists, createRoot for dev mode
-if (root.hasChildNodes()) {
+// Hydrate if pre-rendered content exists, createRoot for dev mode.
+// /ops is a client-only route rewritten to the home page's index.html to
+// avoid a 404 on direct navigation (vercel.json) — its DOM never matches
+// the prerendered home markup, so hydrating against it throws React #418.
+// Render it fresh instead of hydrating.
+const isOpsRoute = window.location.pathname.startsWith('/ops')
+
+if (root.hasChildNodes() && !isOpsRoute) {
   hydrateRoot(root, app)
 } else {
+  if (root.hasChildNodes()) root.innerHTML = ''
   createRoot(root).render(app)
 }
